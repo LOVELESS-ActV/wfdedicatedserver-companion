@@ -1,4 +1,4 @@
-<p align="center"><img src="http://vignette3.wikia.nocookie.net/warframe/images/6/65/FactionSigilConclaveLevel16.png"></p>
+<p align="center"><img src="http://i.imgur.com/EXYvYjW.png"></p>
 <h1 align="center">Warframe Dedicated Server Companion</h1>
 A small-yet-complete tool/bot for [Warframe Dedicated Servers](http://www.warframe.com), <br/>
 using the [discord.io](https://github.com/izy521/discord.io) library.

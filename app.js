@@ -13,7 +13,7 @@ var bot = new Discord.Client({
     //Change the token below before starting the bot !!!
     token: ""
 });
-//Set the channels on which to post the output messages here
+//Set the channels ID on which to post the output messages here
 var channels = ['846545example6588'];
 var db = require('./players.json');
 var newkiller = require('./playertemplate.json');
@@ -21,7 +21,7 @@ var newvictim = JSON.parse(JSON.stringify(newkiller));
 
 bot.on('ready', function () {
   console.log(bot.username + " - (" + bot.id + ")");
-  get_line('L:/Users/AltAcc/AppData/Local/Warframe/DedicatedServer.log', 6, function(err, line){
+  get_line(process.env.PATH.slice(0,1)+':/Users/'+process.env.USERNAME+'/AppData/Local/Warframe/DedicatedServer.log', 6, function(err, line){
     time = line.slice(32,line.indexOf(' [UTC'));
     starttime = new Date(time).getTime();
   });
@@ -31,7 +31,7 @@ bot.on('ready', function () {
       var delta = cstat.size - pstat.size;
       if (delta <= 0) return;
       fs.read(fd, new Buffer(delta), 0, delta, pstat.size, function(err, bytes, buffer) {
-        fs.writeFile("L:/Users/AltAcc/AppData/Local/Warframe/Buffer.log", buffer.toString(), function(err) {
+        fs.writeFile(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log", buffer.toString(), function(err) {
           if(err) {
           return console.log(err);
           }
@@ -51,7 +51,7 @@ process.on('SIGINT', (code) => {
   SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync("L:/Users/AltAcc/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log");
     } else {}
   });
   setTimeout(function () {
@@ -63,7 +63,7 @@ process.on('exit', (code) => {
   SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync("L:/Users/AltAcc/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log");
     } else {}
   });
   setTimeout(function () {
@@ -75,7 +75,7 @@ process.on('SIGQUIT', (code) => {
   SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync("L:/Users/AltAcc/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log");
     } else {}
   });
   setTimeout(function () {
@@ -87,7 +87,7 @@ process.on('SIGSTOP', (code) => {
   SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync("L:/Users/AltAcc/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log");
     } else {}
   });
   setTimeout(function () {
@@ -99,7 +99,7 @@ process.on('SIGTERM', (code) => {
   SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync("L:/Users/AltAcc/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log");
     } else {}
   });
   setTimeout(function () {
@@ -126,7 +126,7 @@ function sleep(millis)
 function CheckKills() {
   console.log('Checking for kills...');
   var kills = [];
-  bufferk = fs.readFileSync("L:/Users/AltAcc/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  bufferk = fs.readFileSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
   bufferk.forEach(function (e) {
     if (e.indexOf('was killed') > -1 && e.indexOf('using a') > -1) {
       if (e.indexOf('DamageTrigger') > -1) {
@@ -156,7 +156,7 @@ function CheckKills() {
 function CheckJoins() {
   console.log('Checking for joins...');
   var joins = [];
-  bufferj = fs.readFileSync("L:/Users/AltAcc/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  bufferj = fs.readFileSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
   bufferj.forEach(function (e) {
     if (e.slice(e.length-2,e.length-1) == ")") {
       if (e.indexOf('AddPlayerToSession') > -1) {
@@ -183,7 +183,7 @@ function CheckJoins() {
 function CheckDisconnects() {
   console.log('Checking for disconnects...');
   var disconnects = [];
-  bufferd = fs.readFileSync("L:/Users/AltAcc/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  bufferd = fs.readFileSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
   bufferd.forEach(function (e) {
     if (e.indexOf('Server: Client') > -1 && e.indexOf('disconnected') > -1 ) {
       disconnect = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), player: e.slice(e.indexOf('Client "')+8, e.indexOf('" disconnected'))};
@@ -204,7 +204,7 @@ function CheckDisconnects() {
 function CheckMaps() {
   console.log('Checking for maps changes...');
   var data = [];
-  bufferm = fs.readFileSync("L:/Users/AltAcc/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  bufferm = fs.readFileSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
   bufferm.forEach(function (e) {
     if (e.indexOf('Loading /Lotus/Levels/PVP/') > -1 && e.indexOf('.level') > -1 ) {
       map = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), map: getMapName(e.slice(e.indexOf('PVP/')+4, e.indexOf('.level')))};

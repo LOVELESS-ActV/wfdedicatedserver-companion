@@ -38,9 +38,15 @@ setTimeout(function () {
 
   bot.on('ready', function () {
     console.log(bot.username + " - (" + bot.id + ")");
+
     get_line(process.env.USERPROFILE+"/AppData/Local/Warframe/DedicatedServer.log", 6, function(err, line){
-      time = line.slice(32,line.indexOf(' [UTC'));
-      starttime = new Date(time).getTime();
+      try {
+        time = line.slice(32,line.indexOf(' [UTC'));
+        starttime = new Date(time).getTime();
+      } catch (e) {
+        console.log("Start me after starting the dedicated server !");
+        process.exit();
+      }
     });
     SendToChat(bot.username+" has successfully initiated. Starting loging...");
     fs.open(filename, 'r', function(err, fd) {

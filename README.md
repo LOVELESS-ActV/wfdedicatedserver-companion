@@ -9,6 +9,8 @@ using the [discord.io](https://github.com/izy521/discord.io) library.
 ```
 git clone https://github.com/LOVELESS-ActV/wfdedicatedserver-companion.git
 
+cd wfdedicatedserver-companion
+
 npm install
 
 node app.js

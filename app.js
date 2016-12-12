@@ -1,6 +1,7 @@
 var fs = require('fs');
 var Discord = require('discord.io');
 //Change process.env.PATH.slice(0,1)to your Windows disk letter and process.env.USERNAME to your current Windows Account Name if you get any issue !
+// The line below isn't the only one to change, use CTRL+H to change all of them!
 var filename = process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/DedicatedServer.log";
 var starttime;
 var monthNames = ["January", "February", "March", "April", "May", "June",
@@ -21,7 +22,7 @@ var newvictim = JSON.parse(JSON.stringify(newkiller));
 
 bot.on('ready', function () {
   console.log(bot.username + " - (" + bot.id + ")");
-  get_line(process.env.PATH.slice(0,1)+':/Users/'+process.env.USERNAME+'/AppData/Local/Warframe/DedicatedServer.log', 6, function(err, line){
+  get_line(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/DedicatedServer.log", 6, function(err, line){
     time = line.slice(32,line.indexOf(' [UTC'));
     starttime = new Date(time).getTime();
   });

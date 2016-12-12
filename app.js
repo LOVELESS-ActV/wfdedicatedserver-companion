@@ -35,7 +35,6 @@ var weapons = require('./weapons.json');
 var maps = require('./maps.json');
 //Set the channels ID on which to post the output messages here
 var db = require('./players.json');
-var newkiller = require('./playertemplate.json');
 var newvictim = JSON.parse(JSON.stringify(newkiller));
 
 setTimeout(function () {

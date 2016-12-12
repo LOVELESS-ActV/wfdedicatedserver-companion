@@ -1,58 +1,109 @@
 var fs = require('fs');
 var Discord = require('discord.io');
+var isConfig = false;
+var token = '';
+var tempconfig = '{"token":"","channels":["",""]}';
+var temprun = "node app.js \r\npause";
+fs.stat('config.ini', function(err, stat) {
+    if(err == null) {
+      isConfig = true;
+    } else if(err.code == 'ENOENT') {
+        // file does not exist
+        fs.writeFile('config.ini', tempconfig);
+        console.log("config.ini created. Please fill the info needed in it.");
+        fs.writeFile('run.bat', temprun);
+        console.log("run.bat created as well. You can start this tool from it now.");
+        process.exit();
+    } else {
+        console.log('Something happened. Err: ', err.code);
+        process.exit();
+    }
+});
+var channels = [];
+setTimeout(function () {
+token = JSON.parse(fs.readFileSync("./config.ini").toString()).token;
+channels = JSON.parse(fs.readFileSync("./config.ini").toString()).channels;
+}, 10);
 //Change process.env.PATH.slice(0,1)to your Windows disk letter and process.env.USERNAME to your current Windows Account Name if you get any issue !
 // The line below isn't the only one to change, use CTRL+H to change all of them!
-var filename = process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/DedicatedServer.log";
+var filename = process.env.USERPROFILE+"/AppData/Local/Warframe/DedicatedServer.log";
 var starttime;
 var monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
 var weapons = require('./weapons.json');
 var maps = require('./maps.json');
-var bot = new Discord.Client({
-    autorun: true,
-    //Change the token below before starting the bot !!!
-    token: ""
-});
 //Set the channels ID on which to post the output messages here
-var channels = ['846545example6588'];
 var db = require('./players.json');
 var newkiller = require('./playertemplate.json');
 var newvictim = JSON.parse(JSON.stringify(newkiller));
 
-bot.on('ready', function () {
-  console.log(bot.username + " - (" + bot.id + ")");
-  get_line(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/DedicatedServer.log", 6, function(err, line){
-    time = line.slice(32,line.indexOf(' [UTC'));
-    starttime = new Date(time).getTime();
+setTimeout(function () {
+  var bot = new Discord.Client({
+      autorun: true,
+      //Change the token below before starting the bot !!!
+      token: token
   });
-  SendToChat("-Livjatan Bot has successfully initiated. Starting loging...");
-  fs.open(filename, 'r', function(err, fd) {
-    fs.watchFile(filename, function(cstat, pstat) {
-      var delta = cstat.size - pstat.size;
-      if (delta <= 0) return;
-      fs.read(fd, new Buffer(delta), 0, delta, pstat.size, function(err, bytes, buffer) {
-        fs.writeFile(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log", buffer.toString(), function(err) {
-          if(err) {
-          return console.log(err);
-          }
+
+  bot.on('ready', function () {
+    console.log(bot.username + " - (" + bot.id + ")");
+    get_line(process.env.USERPROFILE+"/AppData/Local/Warframe/DedicatedServer.log", 6, function(err, line){
+      time = line.slice(32,line.indexOf(' [UTC'));
+      starttime = new Date(time).getTime();
+    });
+    SendToChat(bot.username+" has successfully initiated. Starting loging...");
+    fs.open(filename, 'r', function(err, fd) {
+      fs.watchFile(filename, function(cstat, pstat) {
+        var delta = cstat.size - pstat.size;
+        if (delta <= 0) return;
+        fs.read(fd, new Buffer(delta), 0, delta, pstat.size, function(err, bytes, buffer) {
+          fs.writeFile(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log", buffer.toString(), function(err) {
+            if(err) {
+            return console.log(err);
+            }
+          });
         });
+        setTimeout(function () {
+          CheckKills();
+          CheckJoins();
+          CheckDisconnects();
+          CheckMaps();
+        }, 100);
       });
-      setTimeout(function () {
-        CheckKills();
-        CheckJoins();
-        CheckDisconnects();
-        CheckMaps();
-      }, 100);
     });
   });
-});
+
+  bot.on('message', function (user, userID, channelID, message, rawEvent) {
+    // if ((message[1] == '@' && message[2] == '!' && message[3] == '2' && message[7] == '6' && message[12] == '9') ) {
+    //   bot.sendMessage({
+    //     to: channelID,
+    //     message: response.message
+  	// 	});
+    // }
+    if (message.slice(2,20) == bot.id) {
+      query = message.slice(22,message.length).split(" ");
+      request = {};
+      if (query[1].indexOf("kill")>-1) {
+        request.killer = query[0];
+        if (query[2]) {
+          request.vw = query[2];
+        }
+      } else if (query[1].indexOf("death")>-1) {
+        request.victim = query[0];
+        if (query[2]) {
+          request.kw = query[2];
+        }
+      }
+      request.channel = channelID;
+      GetDBInfo(request);
+    }
+  });
 
 process.on('SIGINT', (code) => {
   SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
     } else {}
   });
   setTimeout(function () {
@@ -64,7 +115,7 @@ process.on('exit', (code) => {
   SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
     } else {}
   });
   setTimeout(function () {
@@ -76,7 +127,7 @@ process.on('SIGQUIT', (code) => {
   SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
     } else {}
   });
   setTimeout(function () {
@@ -88,7 +139,7 @@ process.on('SIGSTOP', (code) => {
   SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
     } else {}
   });
   setTimeout(function () {
@@ -100,7 +151,7 @@ process.on('SIGTERM', (code) => {
   SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
     } else {}
   });
   setTimeout(function () {
@@ -127,13 +178,45 @@ function sleep(millis)
 function CheckKills() {
   console.log('Checking for kills...');
   var kills = [];
-  bufferk = fs.readFileSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  bufferk = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
   bufferk.forEach(function (e) {
     if (e.indexOf('was killed') > -1 && e.indexOf('using a') > -1) {
       if (e.indexOf('DamageTrigger') > -1) {
-        kill = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')), killer: "Map", weapon: getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", "")), dmg: e.slice(e.indexOf('by ')+3, e.indexOf('damage'))};
+        kill = {
+          timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
+          victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')), killer: "Map",
+          weapon: getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", "")),
+          dmg: e.slice(e.indexOf('by ')+3, e.indexOf(' damage'))
+        };
+        if (kill.weapon == undefined) {
+          e = e+"\n";
+          kill = {
+            timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
+            victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')), killer: "Map",
+            weapon: getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", "")),
+            dmg: e.slice(e.indexOf('by ')+3, e.indexOf(' damage'))
+          };
+        }
       } else {
-        kill = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')), killer: e.slice(e.indexOf('from ')+5, e.indexOf(' using')), weapon: getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", "")), shielddmg: e.slice(e.indexOf('by ')+3, e.indexOf(' / ')), healthdmg: e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'))};
+        kill = {
+          timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
+          victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
+          killer: e.slice(e.indexOf('from ')+5, e.indexOf(' using')),
+          weapon: getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", "")),
+          shielddmg: e.slice(e.indexOf('by ')+3, e.indexOf(' / ')),
+          healthdmg: e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'))
+        };
+        if (kill.weapon == undefined) {
+          e = e+"\n";
+          kill = {
+            timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
+            victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
+            killer: e.slice(e.indexOf('from ')+5, e.indexOf(' using')),
+            weapon: getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", "")),
+            shielddmg: e.slice(e.indexOf('by ')+3, e.indexOf(' / ')),
+            healthdmg: e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'))
+          };
+        }
       }
       kills.push(kill);
     }
@@ -144,11 +227,11 @@ function CheckKills() {
     date = date.getDate()+' '+monthNames[date.getMonth()]+' '+date.getFullYear()+' - '+pad(date.getHours(),2)+':'+pad(date.getMinutes(),2)+':'+pad(date.getSeconds(),2)+':'+pad(date.getMilliseconds(), 3);
     setTimeout(function () {
       if (e.killer == "Map") {
-        SendToChat('`['+date+']'+' '+e.victim+' died from map hazard, '+e.weapon+' has dealt '+e.dmg+' upon him/her.`');
+        SendToChat('`['+date+']'+' '+e.victim+' died from map hazard, '+e.weapon+' has dealt '+e.dmg+' damage upon him/her.`');
       } else {
         SendToChat('`['+date+']'+' '+e.victim+' was killed by '+e.killer+' using '+e.weapon+', dealing '+e.shielddmg+' shield damage and '+e.healthdmg+' health damage.`');
       }
-      // PushKillToDB(e.victim,e.killer,e.weapon.replace(' ',''));
+      PushKillToDB(e.victim,e.killer,e.weapon.replace(' ',''));
     }, ik);
     ik += 1337; //( ͡° ͜ʖ ͡°)
   })
@@ -157,7 +240,7 @@ function CheckKills() {
 function CheckJoins() {
   console.log('Checking for joins...');
   var joins = [];
-  bufferj = fs.readFileSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  bufferj = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
   bufferj.forEach(function (e) {
     if (e.slice(e.length-2,e.length-1) == ")") {
       if (e.indexOf('AddPlayerToSession') > -1) {
@@ -184,7 +267,7 @@ function CheckJoins() {
 function CheckDisconnects() {
   console.log('Checking for disconnects...');
   var disconnects = [];
-  bufferd = fs.readFileSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  bufferd = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
   bufferd.forEach(function (e) {
     if (e.indexOf('Server: Client') > -1 && e.indexOf('disconnected') > -1 ) {
       disconnect = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), player: e.slice(e.indexOf('Client "')+8, e.indexOf('" disconnected'))};
@@ -205,7 +288,7 @@ function CheckDisconnects() {
 function CheckMaps() {
   console.log('Checking for maps changes...');
   var data = [];
-  bufferm = fs.readFileSync(process.env.PATH.slice(0,1)+":/Users/"+process.env.USERNAME+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  bufferm = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
   bufferm.forEach(function (e) {
     if (e.indexOf('Loading /Lotus/Levels/PVP/') > -1 && e.indexOf('.level') > -1 ) {
       map = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), map: getMapName(e.slice(e.indexOf('PVP/')+4, e.indexOf('.level')))};
@@ -309,47 +392,109 @@ function get_line(filename, line_no, callback) {
 }
 
 function PushKillToDB(victim, killer, weapon) {
-  var victimIndex = 1;
-  var killerIndex = 1;
-  db.forEach(function (e) {
-    if (victim == e.name) {
-      e.deaths += 1;
-      dbw = "DeathBy"+weapon;
-      e[dbw] += 1;
-      dbk = "DeathBy"+killer;
-      e[dbk] += 1;
-    } else {
-      victimIndex ++;
+  dbw = "DeathBy"+weapon;
+  dbk = "DeathBy"+killer;
+  kww = "KillsWith"+weapon;
+  kov = "KillOn"+victim;
+  if (!db[victim]) {
+    db[victim] = {"Name":victim,"Deaths":1};
+    if (!db[victim][dbw]) {
+      db[victim][dbw] = 1;
     }
-    if (killer == e.name) {
-      e.kills += 1;
-      kww = "KillsWith"+weapon;
-      e[kww] += 1;
-      kov = "KillOn"+victim;
-      e[kov] += 1;
-    } else {
-      killerIndex ++;
+    if (!db[victim][dbk]) {
+      db[victim][dbk] = 1;
     }
-  });
-  if (killerIndex >= db.length) {
-    newkiller.name = killer;
-    newkiller.kills = 1;
-    kww = "KillsWith"+weapon;
-    newkiller[kww] = 1;
-    kov = "KillOn"+victim;
-    newkiller[kov] += 1;
-    db.push(newkiller);
+  } else {
+    if (!db[victim]["Deaths"]) {
+      db[victim]["Deaths"] = 1;
+    } else {
+      db[victim]["Deaths"] += 1;
+    }
+    if (!db[victim][dbw]) {
+      db[victim][dbw] = 1;
+    } else {
+      db[victim][dbw] += 1;
+    }
+    if (!db[victim][dbk]) {
+      db[victim][dbk] = 1;
+    } else {
+      db[victim][dbk] += 1;
+    }
   }
-  if (victimIndex >= db.length) {
-    newvictim.name = victim;
-    newvictim.deaths = 1;
-    dbw = "DeathBy"+weapon;
-    newvictim[dbw] = 1;
-    dbk = "DeathBy"+killer;
-    newvictim[dbk] += 1;
-    db.push(newvictim);
+  if (!db[killer]) {
+    db[killer] = {"Name":killer,"Kills":1};
+    if (!db[killer][kww]) {
+      db[killer][kww] = 1;
+    }
+    if (!db[killer][kov]) {
+      db[killer][kov] = 1;
+    }
+  } else {
+    if (!db[killer]["Kills"]) {
+      db[killer]["Kills"] = 1;
+    } else {
+      db[killer]["Kills"] += 1;
+    }
+    if (!db[killer][kww]) {
+      db[killer][kww] = 1;
+    } else {
+      db[killer][kww] += 1;
+    }
+    if (!db[killer][kov]) {
+      db[killer][kov] = 1;
+    } else {
+      db[killer][kov] += 1;
+    }
   }
-  fs.writeFile('./players.json', JSON.stringify(db, null, "\t"), function(err) {
-    if(err) throw (err);
+  fs.writeFile('./players.json', JSON.stringify(db, null, "\t"), 'utf-8');
+}
+
+function GetDBInfo(request) {
+  if (request.killer) {
+    if (!db[request.killer]) {
+      message = "I don't have anything about "+request.killer+" in my database. :<";
+    } else {
+      if (!db[request.killer]["Kills"]) {
+        message = "I don't have anything about kills by "+request.killer+" in my database. :<";
+      } else {
+        if (request.vw) {
+          kov = "KillOn"+request.vw;
+          if (db[request.killer][kov]) {
+            message = request.killer+" have "+db[request.killer][kov]+" kills registered on/with a "+request.vw+". :>";
+          } else {
+            message = request.killer+" have no kills registered on/with a "+request.vw+". :>";
+          }
+        } else {
+          message = request.killer+" have "+db[request.killer]["Kills"]+" kills registered. :>";
+        }
+      }
+    }
+  }
+  if (request.victim) {
+    if (!db[request.victim]) {
+      message = "I don't have anything about "+request.victim+" in my database. :<";
+    } else {
+      if (!db[request.victim]["Deaths"]) {
+        message = "I don't have anything about "+request.killer+"'s deaths in my database. :<";
+      } else {
+        if (request.kw) {
+          kww = "DeathBy"+request.kw;
+          if (db[request.victim][kww]) {
+            message = request.victim+" have "+db[request.victim][kww]+" deaths registered from "+request.kw+". :>";
+          } else {
+            message = request.victim+" have no deaths registered from "+request.kw+". :>";
+          }
+        } else {
+          message = request.victim+" have "+db[request.victim]["Deaths"]+" deaths registered. :>";
+        }
+      }
+    }
+  }
+  bot.sendMessage({
+    to: request.channel,
+    message: message
   });
 }
+
+
+}, 100);

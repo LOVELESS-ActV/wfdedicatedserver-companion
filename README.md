@@ -7,9 +7,18 @@ using the [discord.io](https://github.com/izy521/discord.io) library.
 
 ### Installation
 ```
-npm install wfdedicatedserver-companion
-node node_modules/wfdedicatedserver-companion
+git clone https://github.com/LOVELESS-ActV/wfdedicatedserver-companion.git
+
+npm install
+
+node app.js
+
+notepad config.ini
+
+node app.js
 ```
+
+<p align="center">You're ready to go !</p>
 
 <!-- ### [Documentation / Gitbooks](https://www.gitbook.com/book/izy521/discord-io/details) -->
 
@@ -19,6 +28,6 @@ node node_modules/wfdedicatedserver-companion
 <img src="http://i.imgur.com/BDPRKa1.png"><br/>
 <hr>
 <img src="http://i.imgur.com/Tx9jR2z.png"><br/>
-<!-- <hr> -->
-<!-- <img src=""><br/> -->
+<hr>
+<img src="http://i.imgur.com/qdR0iMG.png"><br/>
 </p>

@@ -12,7 +12,9 @@ try {
     console.log("config.ini created. Please fill the info needed in it.");
     fs.writeFile('run.bat', "node app.js \r\npause");
     console.log("run.bat created as well. You can start this tool from it now.");
-    process.exit();
+    setTimeout(function () {
+      process.exit();
+    }, 100);
   }
 }
 //Change process.env.PATH.slice(0,1)to your Windows disk letter and process.env.USERNAME to your current Windows Account Name if you get any issue !

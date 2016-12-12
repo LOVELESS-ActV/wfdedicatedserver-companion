@@ -2,28 +2,19 @@ var fs = require('fs');
 var Discord = require('discord.io');
 var isConfig = false;
 var token = '';
-var tempconfig = '{"token":"","channels":["",""]}';
-var temprun = "node app.js \r\npause";
-fs.stat('config.ini', function(err, stat) {
-    if(err == null) {
-      isConfig = true;
-    } else if(err.code == 'ENOENT') {
-        // file does not exist
-        fs.writeFile('config.ini', tempconfig);
-        console.log("config.ini created. Please fill the info needed in it.");
-        fs.writeFile('run.bat', temprun);
-        console.log("run.bat created as well. You can start this tool from it now.");
-        process.exit();
-    } else {
-        console.log('Something happened. Err: ', err.code);
-        process.exit();
-    }
-});
 var channels = [];
-setTimeout(function () {
-token = JSON.parse(fs.readFileSync("./config.ini").toString()).token;
-channels = JSON.parse(fs.readFileSync("./config.ini").toString()).channels;
-}, 10);
+try {
+  token = JSON.parse(fs.readFileSync("./config.ini").toString()).token;
+  channels = JSON.parse(fs.readFileSync("./config.ini").toString()).channels;
+} catch(ex) {
+  if(ex.code == "ENOENT") {
+    fs.writeFile('./config.ini', '{"token":"","channels":[""]}');
+    console.log("config.ini created. Please fill the info needed in it.");
+    fs.writeFile('run.bat', "node app.js \r\npause");
+    console.log("run.bat created as well. You can start this tool from it now.");
+    process.exit();
+  }
+}
 //Change process.env.PATH.slice(0,1)to your Windows disk letter and process.env.USERNAME to your current Windows Account Name if you get any issue !
 // The line below isn't the only one to change, use CTRL+H to change all of them!
 var filename = process.env.USERPROFILE+"/AppData/Local/Warframe/DedicatedServer.log";

@@ -26,13 +26,11 @@ var monthNames = ["January", "February", "March", "April", "May", "June",
 ];
 var weapons = require('./weapons.json');
 var maps = require('./maps.json');
-//Set the channels ID on which to post the output messages here
 var db = require('./players.json');
 
 setTimeout(function () {
   var bot = new Discord.Client({
       autorun: true,
-      //Change the token below before starting the bot !!!
       token: token
   });
 
@@ -157,7 +155,16 @@ process.on('SIGTERM', (code) => {
 });
 
 function getWeaponName(devname) {
-  return weapons[devname];
+  output = '';
+  Object.keys(weapons).map(function(objectKey, index) {
+    var value = weapons[objectKey];
+    if (objectKey.indexOf(devname) > -1) {
+      output = value;
+    } else {
+      output = "Unknown Weapon";
+    }
+  });
+  return output;
 }
 
 function getMapName(devname) {
@@ -177,45 +184,54 @@ function CheckKills() {
   var kills = [];
   bufferk = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
   bufferk.forEach(function (e) {
+    wp = getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", ""));
     if (e.indexOf('was killed') > -1 && e.indexOf('using a') > -1) {
       if (e.indexOf('DamageTrigger') > -1) {
-        kill = {
-          timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
-          victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')), killer: "Map",
-          weapon: getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", "")),
-          dmg: e.slice(e.indexOf('by ')+3, e.indexOf(' damage'))
-        };
-        if (kill.weapon == undefined) {
+        if (wp !== undefined) {
+          kill = {
+            timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
+            victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
+            killer: "Map",
+            weapon: wp,
+            dmg: e.slice(e.indexOf('by ')+3, e.indexOf(' damage'))
+          };
+        } else {
           e = e+"\n";
           kill = {
             timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
-            victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')), killer: "Map",
-            weapon: getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", "")),
+            victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
+            killer: "Map",
+            weapon: "undefined",
             dmg: e.slice(e.indexOf('by ')+3, e.indexOf(' damage'))
           };
         }
       } else {
-        kill = {
-          timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
-          victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
-          killer: e.slice(e.indexOf('from ')+5, e.indexOf(' using')),
-          weapon: getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", "")),
-          shielddmg: e.slice(e.indexOf('by ')+3, e.indexOf(' / ')),
-          healthdmg: e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'))
-        };
-        if (kill.weapon == undefined) {
+        if (wp !== undefined) {
+          kill = {
+            timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
+            victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
+            killer: e.slice(e.indexOf('from ')+5, e.indexOf(' using')),
+            weapon: wp
+          };
+        } else {
           e = e+"\n";
           kill = {
             timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
             victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
             killer: e.slice(e.indexOf('from ')+5, e.indexOf(' using')),
-            weapon: getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", "")),
-            shielddmg: e.slice(e.indexOf('by ')+3, e.indexOf(' / ')),
-            healthdmg: e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'))
+            weapon: "undefined"
           };
+        }
+        if (e.indexOf("/") > -1) {
+          kill.shielddmg = e.slice(e.indexOf('by ')+3, e.indexOf(' / '));
+          kill.healthdmg = e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'));
+        } else {
+          kill.shielddmg = "0";
+          kill.healthdmg = e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'));
         }
       }
       kills.push(kill);
+      console.log(e.slice(e.indexOf('by ')+3, e.indexOf(' / ')));
     }
   });
   var ik = 0;

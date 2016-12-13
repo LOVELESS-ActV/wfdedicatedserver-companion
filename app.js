@@ -227,17 +227,31 @@ function CheckKills() {
           kill.shielddmg = "0";
           kill.healthdmg = e.slice(e.indexOf('by ')+3, e.indexOf(' damage'));
         }
+        if (!(/^\+?(0|[1-9]\d*)$/.test(e.slice(0, 1)))) {
+          kill.timestamp = 0;
+          if (e.indexOf(":") > -1) {
+            kill.victim = e.slice(e.indexOf(': ')+2, e.indexOf(' was'));
+          } else {
+            kill.victim = "Unknown";
+          }
+        }
       }
       kills.push(kill);
     }
   });
   var ik = 0;
   kills.forEach(function(e) {
-    var date = new Date(e.timestamp);
-    date = date.getDate()+' '+monthNames[date.getMonth()]+' '+date.getFullYear()+' - '+pad(date.getHours(),2)+':'+pad(date.getMinutes(),2)+':'+pad(date.getSeconds(),2)+':'+pad(date.getMilliseconds(), 3);
+    if (e.timestamp == 0) {
+      date = "Unable to retrieve event time";
+    } else {
+      var date = new Date(e.timestamp);
+      date = date.getDate()+' '+monthNames[date.getMonth()]+' '+date.getFullYear()+' - '+pad(date.getHours(),2)+':'+pad(date.getMinutes(),2)+':'+pad(date.getSeconds(),2)+':'+pad(date.getMilliseconds(), 3);
+    }
     setTimeout(function () {
       if (e.killer == "Map") {
         SendToChat('`['+date+']'+' '+e.victim+' died from map hazard, '+e.weapon+' has dealt '+e.dmg+' damage upon him/her.`');
+      } else if (e.shielddmg == "0") {
+        SendToChat('`['+date+']'+' '+e.victim+' was killed by '+e.killer+' using '+e.weapon+', dealing '+e.healthdmg+' health damage.`');
       } else {
         SendToChat('`['+date+']'+' '+e.victim+' was killed by '+e.killer+' using '+e.weapon+', dealing '+e.shielddmg+' shield damage and '+e.healthdmg+' health damage.`');
       }
@@ -444,6 +458,9 @@ function PushKillToDB(victim, killer, weapon) {
       db[killer]["Kills"] = 1;
     } else {
       db[killer]["Kills"] += 1;
+      if ((db[killer]["Kills"]%1000) == 0) {
+        UploadToChat("./data/congrats.gif",db[killer]+" has attained "+db[killer]["Kills"]+" kills. Congrats.");
+      }
     }
     if (!db[killer][kww]) {
       db[killer][kww] = 1;

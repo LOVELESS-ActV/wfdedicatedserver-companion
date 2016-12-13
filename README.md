@@ -19,7 +19,8 @@ notepad config.ini
 
 go to https://discordapp.com/developers/applications/me and make yourself an app to get a token, then
 
-activate https://support.discordapp.com/hc/en-us/article_attachments/208086687/Appearances.png to get channels id by right clicking them !
+activate https://support.discordapp.com/hc/en-us/article_attachments/208086687/Appearances.png
+to get channels id by right clicking them !
 
 fill config.ini with the token and the channels ids
 

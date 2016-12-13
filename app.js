@@ -84,14 +84,21 @@ setTimeout(function () {
         if (query[2]) {
           request.vw = query[2];
         }
+        request.channel = channelID;
+        GetDBInfo(request);
       } else if (query[1].indexOf("death")>-1) {
         request.victim = query[0];
         if (query[2]) {
           request.kw = query[2];
         }
+        request.channel = channelID;
+        GetDBInfo(request);
+      } else {
+        bot.sendMessage({
+          to: request.channel,
+          message: 'Sorry, I'+"'"+'m not sure what you mean by "'+message+'"... :<'
+        });
       }
-      request.channel = channelID;
-      GetDBInfo(request);
     }
   });
 
@@ -325,17 +332,26 @@ function CheckMaps() {
     var date = new Date(e.timestamp);
     date = date.getDate()+' '+monthNames[date.getMonth()]+' '+date.getFullYear()+' - '+pad(date.getHours(),2)+':'+pad(date.getMinutes(),2)+':'+pad(date.getSeconds(),2)+':'+pad(date.getMilliseconds(), 3);
     setTimeout(function () {
-      if (e.map.replace(' ','') == 'FreightLine' || e.map.replace(' ','') == 'Settlement') {
-        //3 pictures available
-        n = Math.floor(1+(Math.random()*3)).toString();
-        UploadToChat("mapsimg/"+e.map.replace(' ','')+n+".png",'`['+date+']'+' Server has switched map to '+e.map+'.`');
-      } else if (e.map.replace(' ','') == 'DockingBay' || e.map.replace(' ','') == 'NavigationArray') {
-        //2 pictures available
-        n = Math.floor(1+(Math.random()*2)).toString();
-        UploadToChat("mapsimg/"+e.map.replace(' ','')+n+".png",'`['+date+']'+' Server has switched map to '+e.map+'.`');
-      } else {
-        //no picture available
+      if (e.map.replace(' ','') == 'Outpost' || e.map.replace(' ','') == 'Bunkers' || e.map.replace(' ','') == 'Shipyards') {
         SendToChat('`['+date+']'+' Server has switched map to '+e.map+'.`');
+      } else {
+        if (e.map.replace(' ','') == 'FreightLine' || e.map.replace(' ','') == 'CephalonSpires' || e.map.replace(' ','') == 'DockingBay') {
+          //4 pictures available
+          n = Math.floor(1+(Math.random()*4)).toString();
+        } else if (e.map.replace(' ','') == 'ForgottenHalls') {
+          //5 pictures available
+          n = Math.floor(1+(Math.random()*5)).toString();
+        } else if (e.map.replace(' ','') == 'NavigationArray' || e.map.replace(' ','') == 'Settlement') {
+          //6 pictures available
+          n = Math.floor(1+(Math.random()*6)).toString();
+        } else if (e.map.replace(' ','') == 'Core' || e.map.replace(' ','') == 'InfestedFrigate') {
+          //8 pictures available
+          n = Math.floor(1+(Math.random()*8)).toString();
+        } else if (e.map.replace(' ','') == 'LunaRuins') {
+          //9 pictures available
+          n = Math.floor(1+(Math.random()*9)).toString();
+        }
+        UploadToChat("data/maps/"+e.map.replace(' ','')+"/"+n+".png",'`['+date+']'+' Server has switched map to '+e.map+'.`');
       }
     }, im);
     im += 1337; //( ͡° ͜ʖ ͡°)

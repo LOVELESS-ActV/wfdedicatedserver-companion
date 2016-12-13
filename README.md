@@ -17,10 +17,20 @@ node app.js
 
 notepad config.ini
 
+go to https://discordapp.com/developers/applications/me and make yourself an app to get a token, then
+
+activate https://support.discordapp.com/hc/en-us/article_attachments/208086687/Appearances.png to get channels id by right clicking them !
+
+fill config.ini with the token and the channels ids
+
+launch your dedicated server...
+
 node app.js
 ```
 
-<p align="center">You're ready to go !</p>
+<p align="center">You're ready to go !<br/>
+<span style="font-size:80%;">Mind that you can run multiple instances with the same token !</span>
+</p>
 
 <!-- ### [Documentation / Gitbooks](https://www.gitbook.com/book/izy521/discord-io/details) -->
 

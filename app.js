@@ -160,8 +160,6 @@ function getWeaponName(devname) {
     var value = weapons[objectKey];
     if (objectKey.indexOf(devname) > -1) {
       output = value;
-    } else {
-      output = "Unknown Weapon";
     }
   });
   return output;
@@ -187,7 +185,7 @@ function CheckKills() {
     wp = getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", ""));
     if (e.indexOf('was killed') > -1 && e.indexOf('using a') > -1) {
       if (e.indexOf('DamageTrigger') > -1) {
-        if (wp !== undefined) {
+        if (wp !== '') {
           kill = {
             timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
             victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
@@ -201,12 +199,12 @@ function CheckKills() {
             timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
             victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
             killer: "Map",
-            weapon: "undefined",
+            weapon: "Unknown Weapon",
             dmg: e.slice(e.indexOf('by ')+3, e.indexOf(' damage'))
           };
         }
       } else {
-        if (wp !== undefined) {
+        if (wp !== '') {
           kill = {
             timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
             victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
@@ -219,7 +217,7 @@ function CheckKills() {
             timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
             victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
             killer: e.slice(e.indexOf('from ')+5, e.indexOf(' using')),
-            weapon: "undefined"
+            weapon: "Unknown Weapon"
           };
         }
         if (e.indexOf("/") > -1) {
@@ -227,11 +225,10 @@ function CheckKills() {
           kill.healthdmg = e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'));
         } else {
           kill.shielddmg = "0";
-          kill.healthdmg = e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'));
+          kill.healthdmg = e.slice(e.indexOf('by ')+3, e.indexOf(' damage'));
         }
       }
       kills.push(kill);
-      console.log(e.slice(e.indexOf('by ')+3, e.indexOf(' / ')));
     }
   });
   var ik = 0;

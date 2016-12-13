@@ -3,9 +3,10 @@
 A small-yet-complete tool/bot for [Warframe Dedicated Servers](http://www.warframe.com), <br/>
 using the [discord.io](https://github.com/izy521/discord.io) library.
 
-Made by [LOVELESS-Act.V](https://forums.warframe.com/profile/688319-loveless-actv/) / [-Livjatan](https://forums.warframe.com/profile/1792585-livjatan/), with kinds contributions from [Pythadragon](https://forums.warframe.com/profile/482706-pythadragon/) and [Kontrollo](https://forums.warframe.com/profile/647185-kontrollo/)
+Made by [LOVELESS-Act.V](https://forums.warframe.com/profile/688319-loveless-actv/) / [-Livjatan](https://forums.warframe.com/profile/1792585-livjatan/), with kinds contributions from [Pythadragon](https://forums.warframe.com/profile/482706-pythadragon/) and [Kontrollo](https://forums.warframe.com/profile/647185-kontrollo/).
+<br/><br/>
+Don't forget to join us on the conclave discord ! <br/>Use the shortcut picture below ↓
 <br/>
-Don't forget to join us on the conclave discord ! Use the shortcut picture below ↓
 [![Discord](https://discordapp.com/api/guilds/144519729044783104/widget.png)](http://discord.me/conclave)
 
 ### Installation

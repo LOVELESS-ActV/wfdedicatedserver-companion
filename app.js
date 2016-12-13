@@ -75,6 +75,7 @@ setTimeout(function () {
     //     message: response.message
   	// 	});
     // }
+    console.log(message);
     if (message.slice(2,20) == bot.id) {
       query = message.slice(22,message.length).split(" ");
       request = {};
@@ -459,7 +460,7 @@ function PushKillToDB(victim, killer, weapon) {
     } else {
       db[killer]["Kills"] += 1;
       if ((db[killer]["Kills"]%1000) == 0) {
-        UploadToChat("./data/congrats.gif",db[killer]+" has attained "+db[killer]["Kills"]+" kills. Congrats.");
+        UploadToChat("data/congrats.gif","@here "+db[killer]["Name"]+" has attained "+db[killer]["Kills"]+" kills. Congrats.");
       }
     }
     if (!db[killer][kww]) {

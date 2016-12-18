@@ -1,5 +1,6 @@
 var fs = require('fs');
 var Discord = require('discord.io');
+var merge = require('gulp-merge-json');
 var isConfig = false;
 var token = '';
 var channels = [];
@@ -14,7 +15,7 @@ try {
     console.log("run.bat created as well. You can start this tool from it now.");
     setTimeout(function () {
       process.exit();
-    }, 100);
+    }, 1000);
   }
 }
 //Change process.env.PATH.slice(0,1)to your Windows disk letter and process.env.USERNAME to your current Windows Account Name if you get any issue !
@@ -46,23 +47,33 @@ setTimeout(function () {
         process.exit();
       }
       try {
-        db = JSON.parse(fs.readFileSync('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json').toString());
+        // db = JSON.parse(fs.readFileSync('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json').toString());
+        db = JSON.parse('./players.json').toString());
       } catch(exc) {
         if(exc.code == "ENOENT") {
-          fs.writeFile('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json', '{}');
+          // fs.writeFile('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json', '{}');
+          fs.writeFile('./players.json', '{}');
           setTimeout(function () {
-            db = JSON.parse(fs.readFileSync('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json').toString());
+            // db = JSON.parse(fs.readFileSync('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json').toString());
+            db = JSON.parse('./players.json').toString());
           }, 10);
         }
       }
     });
     SendToChat(bot.username+" has successfully initiated. Starting loging...");
+    lastline = "";
     fs.open(filename, 'r', function(err, fd) {
       fs.watchFile(filename, function(cstat, pstat) {
         var delta = cstat.size - pstat.size;
         if (delta <= 0) return;
         fs.read(fd, new Buffer(delta), 0, delta, pstat.size, function(err, bytes, buffer) {
-          fs.writeFile(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log", buffer.toString(), function(err) {
+          bwrite = buffer.toString().replace(/(\r\n|\r|\n)/g, '\n').split("\n");
+          write = ""+lastline;
+          lastline = bwrite[bwrite.length-1];
+          bwrite.pop();
+          write += bwrite.join("\n");
+          console.log(write);
+          fs.writeFile(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log", write, function(err) {
             if(err) {
             return console.log(err);
             }
@@ -92,25 +103,38 @@ setTimeout(function () {
       if (query[1].indexOf("kill")>-1) {
         request.killer = query[0];
         if (query[2]) {
-          request.vw = query[2];
+          request.vw = message.slice(message.indexOf(query[2]),message.length);
         }
         request.channel = channelID;
+        request.query = "kill";
+        console.log(request);
         GetDBInfo(request);
       } else if (query[1].indexOf("death")>-1) {
         request.victim = query[0];
         if (query[2]) {
-          request.kw = query[2];
+          request.kw = message.slice(message.indexOf(query[2]),message.length);
         }
         request.channel = channelID;
+        request.query = "death";
         GetDBInfo(request);
       } else if (query[1].indexOf("KDR")>-1) {
         request.kdr = query[0];
         request.channel = channelID;
+        request.query = "KDR";
+        GetDBInfo(request);
+      } else if (message.indexOf("wkill")) {
+        request.weapon = message.slice(22,message.indexOf(" wkill"));
+        queryw = message.slice(message.indexOf("wkill"),message.length).split(" ");
+        if (queryw[1]) {
+          request.wv = queryw[1];
+        }
+        request.channel = channelID;
+        request.query = "wkill";
         GetDBInfo(request);
       } else {
         bot.sendMessage({
           to: channelID,
-          message: 'Sorry, I'+"'"+'m not sure what you mean by "'+message+'"... :<'
+          message: 'Sorry, I'+"'"+'m not sure what you mean by "'+message.slice(22,message.length)+'"... :<'
         });
       }
     }
@@ -525,11 +549,12 @@ function PushKillToDB(victim, killer, weapon) {
       db[killer][kov] += 1;
     }
   }
-  fs.writeFile('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json', JSON.stringify(db, null, "\t"), 'utf-8');
+  // fs.writeFile('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json', JSON.stringify(db, null, "\t"), 'utf-8');
+  fs.writeFile('./players.json', JSON.stringify(db, null, "\t"), 'utf-8');
 }
 
 function GetDBInfo(request) {
-  if (request.killer) {
+  if (request.query == "kill") {
     if (!db[request.killer]) {
       message = "I don't have anything about "+request.killer+" in my database. :<";
     } else {
@@ -538,10 +563,15 @@ function GetDBInfo(request) {
       } else {
         if (request.vw) {
           kov = "KillOn"+request.vw;
+          kww = "KillsWith"+request.vw.replace(" ","");
           if (db[request.killer][kov]) {
-            message = request.killer+" have "+db[request.killer][kov]+" kills registered on/with a "+request.vw+". :>";
+            message = request.killer+" have "+db[request.killer][kov]+" kills registered on "+request.vw+". :>";
           } else {
-            message = request.killer+" have no kills registered on/with a "+request.vw+". :>";
+            if (db[request.killer][kww]) {
+              message = request.killer+" have "+db[request.killer][kww]+" kills registered with "+request.vw+". :>";
+            } else {
+              message = request.killer+" have no kills registered on/with "+request.vw+". :>";
+            }
           }
         } else {
           message = request.killer+" have "+db[request.killer]["Kills"]+" kills registered. :>";
@@ -549,7 +579,7 @@ function GetDBInfo(request) {
       }
     }
   }
-  if (request.victim) {
+  if (request.query == "death") {
     if (!db[request.victim]) {
       message = "I don't have anything about "+request.victim+" in my database. :<";
     } else {
@@ -557,7 +587,7 @@ function GetDBInfo(request) {
         message = "I don't have anything about "+request.killer+"'s deaths in my database. :<";
       } else {
         if (request.kw) {
-          kww = "DeathBy"+request.kw;
+          kww = "DeathBy"+request.kw.replace(" ","");
           if (db[request.victim][kww]) {
             message = request.victim+" have "+db[request.victim][kww]+" deaths registered from "+request.kw+". :>";
           } else {
@@ -569,7 +599,7 @@ function GetDBInfo(request) {
       }
     }
   }
-  if (request.kdr) {
+  if (request.query == "KDR") {
     if (!db[request.kdr]) {
       message = "I don't have anything about "+request.kdr+" in my database. :<";
     } else {
@@ -579,6 +609,29 @@ function GetDBInfo(request) {
         } else {
           message = request.kdr+" have a "+(db[request.kdr]["Kills"]/db[request.kdr]["Deaths"])+" Kill/Death Rate. :>";
         }
+      }
+    }
+  }
+  if (request.query == "wkill") {
+    kww = "KillsWith"+request.weapon.replace(" ","");
+    dbw = "DeathBy"+request.weapon.replace(" ","");
+    totalkills = 0;
+    for (var player in db) {
+      if (db[player][kww] != undefined) {
+        totalkills += db[player][kww];
+      }
+    }
+    if (totalkills == 0) {
+      message = "I don't have anything about kills with "+request.weapon+" in my database. :<";
+    } else {
+      if (request.wv) {
+        if (!db[request.wv] || !db[request.wv][dbw]) {
+          message = "I don't have anything about kills with "+request.weapon+" on "+request.wv+" in my database. :<";
+        } else {
+          message = request.weapon+" have "+db[request.wv][dbw]+" kills registered on "+db[request.wv]["Name"]+". :>";
+        }
+      } else {
+        message = request.weapon+" have "+totalkills+" kills registered. :>";
       }
     }
   }

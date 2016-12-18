@@ -26,7 +26,7 @@ var monthNames = ["January", "February", "March", "April", "May", "June",
 ];
 var weapons = require('./weapons.json');
 var maps = require('./maps.json');
-var db = require('./players.json');
+var db = {};
 
 setTimeout(function () {
   var bot = new Discord.Client({
@@ -45,6 +45,16 @@ setTimeout(function () {
         console.log("Start me after starting the dedicated server !");
         process.exit();
       }
+      try {
+        db = JSON.parse(fs.readFileSync('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json').toString());
+      } catch(exc) {
+        if(exc.code == "ENOENT") {
+          fs.writeFile('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json', '{}');
+          setTimeout(function () {
+            db = JSON.parse(fs.readFileSync('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json').toString());
+          }, 10);
+        }
+      }
     });
     SendToChat(bot.username+" has successfully initiated. Starting loging...");
     fs.open(filename, 'r', function(err, fd) {
@@ -61,6 +71,7 @@ setTimeout(function () {
         setTimeout(function () {
           CheckKills();
           CheckJoins();
+          CheckTeams();
           CheckDisconnects();
           CheckMaps();
         }, 100);
@@ -75,7 +86,6 @@ setTimeout(function () {
     //     message: response.message
   	// 	});
     // }
-    console.log(message);
     if (message.slice(2,20) == bot.id) {
       query = message.slice(22,message.length).split(" ");
       request = {};
@@ -93,9 +103,13 @@ setTimeout(function () {
         }
         request.channel = channelID;
         GetDBInfo(request);
+      } else if (query[1].indexOf("KDR")>-1) {
+        request.kdr = query[0];
+        request.channel = channelID;
+        GetDBInfo(request);
       } else {
         bot.sendMessage({
-          to: request.channel,
+          to: channelID,
           message: 'Sorry, I'+"'"+'m not sure what you mean by "'+message+'"... :<'
         });
       }
@@ -259,9 +273,9 @@ function CheckKills() {
       if (e.killer == "Map") {
         SendToChat('`['+date+']'+' '+e.victim+' died from map hazard, '+e.weapon+' has dealt '+e.dmg+' damage upon him/her.`');
       } else if (e.shielddmg == "0") {
-        SendToChat('`['+date+']'+' '+e.victim+' was killed by '+e.killer+' using '+e.weapon+', dealing '+e.healthdmg+' health damage.`');
+        SendToChat('`['+date+']'+' '+e.victim+' was killed by '+e.killer+' using '+e.weapon+', dealing '+e.healthdmg+' damage.`');
       } else {
-        SendToChat('`['+date+']'+' '+e.victim+' was killed by '+e.killer+' using '+e.weapon+', dealing '+e.shielddmg+' shield damage and '+e.healthdmg+' health damage.`');
+        SendToChat('`['+date+']'+' '+e.victim+' was killed by '+e.killer+' using '+e.weapon+', dealing '+e.shielddmg+' damage out of '+e.healthdmg+' potential damage.`');
       }
       PushKillToDB(e.victim,e.killer,e.weapon.replace(' ',''));
     }, ik);
@@ -286,13 +300,34 @@ function CheckJoins() {
     var date = new Date(e.timestamp);
     date = date.getDate()+' '+monthNames[date.getMonth()]+' '+date.getFullYear()+' - '+pad(date.getHours(),2)+':'+pad(date.getMinutes(),2)+':'+pad(date.getSeconds(),2)+':'+pad(date.getMilliseconds(), 3);
     setTimeout(function () {
-      if (e.team == '255') {
-        SendToChat('`['+date+']'+' '+e.player+' has joined.'+'`');
-      } else {
-        SendToChat('`['+date+']'+' '+e.player+' has joined on team '+e.team+'.`');
-      }
+      SendToChat('`['+date+']'+' '+e.player+' has joined.'+'`');
     }, ij);
     ij += 1337; //( ͡° ͜ʖ ͡°)
+  })
+}
+
+function CheckTeams() {
+  console.log('Checking for team changes...');
+  var teams = [];
+  buffert = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  buffert.forEach(function (e) {
+    if (e.indexOf('PvpTeamSelect') > -1) {
+      team = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), player: e.slice(e.indexOf('Adding ')+7, e.indexOf(' to team')), team: e.slice(e.length-2,e.length-1)};
+      teams.push(team);
+    }
+  });
+  var it = 0;
+  teams.forEach(function(e) {
+    var date = new Date(e.timestamp);
+    date = date.getDate()+' '+monthNames[date.getMonth()]+' '+date.getFullYear()+' - '+pad(date.getHours(),2)+':'+pad(date.getMinutes(),2)+':'+pad(date.getSeconds(),2)+':'+pad(date.getMilliseconds(), 3);
+    setTimeout(function () {
+      if (e.team == '0') {
+        SendToChat('`['+date+']'+' '+e.player+' is now on team Sun.`');
+      } else {
+        SendToChat('`['+date+']'+' '+e.player+' is now on team Moon.`');
+      }
+    }, it);
+    it += 1337; //( ͡° ͜ʖ ͡°)
   })
 }
 
@@ -490,7 +525,7 @@ function PushKillToDB(victim, killer, weapon) {
       db[killer][kov] += 1;
     }
   }
-  fs.writeFile('./players.json', JSON.stringify(db, null, "\t"), 'utf-8');
+  fs.writeFile('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json', JSON.stringify(db, null, "\t"), 'utf-8');
 }
 
 function GetDBInfo(request) {
@@ -530,6 +565,19 @@ function GetDBInfo(request) {
           }
         } else {
           message = request.victim+" have "+db[request.victim]["Deaths"]+" deaths registered. :>";
+        }
+      }
+    }
+  }
+  if (request.kdr) {
+    if (!db[request.kdr]) {
+      message = "I don't have anything about "+request.kdr+" in my database. :<";
+    } else {
+      if (!db[request.kdr]["Kills"]) {
+      } else {
+        if (!db[request.kdr]["Deaths"]) {
+        } else {
+          message = request.kdr+" have a "+(db[request.kdr]["Kills"]/db[request.kdr]["Deaths"])+" Kill/Death Rate. :>";
         }
       }
     }

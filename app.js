@@ -1,6 +1,5 @@
 var fs = require('fs');
 var Discord = require('discord.io');
-var merge = require('gulp-merge-json');
 var express = require('express'),
     server = express();
 var path = require('path');
@@ -8,7 +7,7 @@ var isConfig = false;
 var token = '';
 var channels = [];
 //Feel free to change this to whatever you wish.
-var port = 8080;
+var port = 8180;
 try {
   token = JSON.parse(fs.readFileSync("./config.ini").toString()).token;
   channels = JSON.parse(fs.readFileSync("./config.ini").toString()).channels;

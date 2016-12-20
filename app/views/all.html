@@ -1,0 +1,25 @@
+<div id="container">
+<section ng-init="GoToPlayer()">
+    <article>
+      <table id="table">
+        <thead>
+          <th id="thn" ng-click="(o == 'Name' ? o='-Name' : o='Name')">Name</th>
+          <th id="thk" ng-click="(o == 'Kills' ? o='-Kills' : o='Kills')">Kills</th>
+          <th id="thd" ng-click="(o == 'Deaths' ? o='-Deaths' : o='Deaths')">Deaths</th>
+          <th id="thkdr" ng-click="(o == 'Kills/Deaths' ? o='-(Kills/Deaths)' : o='Kills/Deaths')">KDR</th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="e in players | orderBy:'Name' | orderBy:o ">
+            <td><a class="playerlink" path='{{e.Name}}'>{{e["Name"]}}</a></td>
+            <td>{{e["Kills"] | number}}</td>
+            <td>{{e["Deaths"] | number}}</td>
+            <td>{{e["KDR"] | number}}</td>
+          </tr>
+        </tbody>
+      </table>
+    </article>
+</section>
+</div>
+<script type="text/javascript">
+</script>
+<br><br><br>

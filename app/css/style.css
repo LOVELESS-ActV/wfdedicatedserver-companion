@@ -1,0 +1,257 @@
+﻿body {
+  background-color: #000;
+  margin: auto;
+	color:white;
+}
+
+a {
+	-webkit-transition: color 0.7s ease-in-out;
+	-moz-transition: color 0.7s ease-in-out;
+	-o-transition: color 0.7s ease-in-out;
+	transition: color 0.7s ease-in-out;
+}
+
+#bg {
+	background:url("http://i.imgur.com/yz1swZB.jpg") no-repeat;
+	background-size: cover;
+	background-attachment:fixed;
+	position:fixed;
+	width:100%;
+	height:100%;
+	top:0;
+	left:0;
+	z-index:-1;
+  transition: background 1s linear;
+}
+
+section h1, footer h1, nav a
+{
+    font-family:Constentia;
+    font-weight:normal;
+    text-transform:uppercase;
+}
+
+#maintitle {
+	float:left;
+	margin-left:1%;
+	flex:1;
+}
+
+header {
+	display:flex;
+  align-items: flex-end;
+	border-bottom:3px groove rgba(0, 0, 0, 0.7);
+	background-color:rgba(0, 0, 0, 0.8);
+	min-height:180px;
+  width: 100%;
+  margin-bottom: 2em;
+  position: fixed;
+  top: 0;
+}
+
+header #logo {
+	position:relative;
+	top:1em;
+	left:3%;
+}
+
+header h1 {
+	position:relative;
+	bottom:-0.3em;
+	left:7.5%;
+	color:#000;
+	margin-top:-1.2em;
+	font-size:250%;
+	font-family:AlexBrush;
+	font-style:oblique;
+	text-shadow: #fff 2px 2px 2px, #fff -2px 2px 2px, #fff -2px -2px 2px, #fff 2px -2px 2px;
+}
+
+header h2 {
+	position:relative;
+	bottom:0.23em;
+	left:1.6%;
+    font-family:"QuickSand";
+}
+
+nav ul {
+    list-style-type:none;
+	font-size:150%;
+    display:flex;
+	margin-right:1em;
+	position:relative;
+	top:60%;
+}
+
+nav a {
+	font-family:"QuickSand";
+    color:white;
+	text-decoration:none;
+	margin-left:0;
+	margin-right:0;
+	padding-left:0.5em;
+	padding-right:0.5em;
+}
+
+nav a:hover {
+	border-top: 0px solid black;
+	background-image: linear-gradient(transparent, rgba(255, 255, 255, 0.8), transparent), linear-gradient(transparent, rgba(255, 255, 255, 0.8), transparent);
+	background-size: 1px 100%;
+	background-position: 0 0, 100% 0;
+	background-repeat:no-repeat;
+}
+
+#mainview {
+  margin-top: 220px;
+}
+
+section {
+    display:flex;
+    margin-bottom:2em;
+}
+
+article {
+    background-color:rgba(0, 0, 0, 0.6);
+    box-shadow: -1px 1px 4px rgba(0, 0, 0, 0.5), 1px -1px 4px rgba(0, 0, 0, 0.5), -1px -1px 4px rgba(0, 0, 0, 0.5), 1px 1px 4px rgba(0, 0, 0, 0.5);
+	border-radius:5px;
+	padding-left:1em;
+    margin-left:1em;
+	padding-right:1em;
+    margin-right:2em;
+    flex:3;
+}
+
+article h1 {
+	font-family:"QuickSand";
+	font-size:150%;
+}
+
+.ico_categorie {
+    vertical-align:middle;
+	margin-top:-0.2em;
+    margin-left:0.4em;
+    margin-right:0.7em;
+}
+
+aside {
+    margin-right:1em;
+    position:relative;
+    background-color:rgba(0, 0, 0, 0.6);
+    box-shadow: -1px 1px 4px rgba(255, 255, 255, 0.5), 1px -1px 4px rgba(255, 255, 255, 0.5), -1px -1px 4px rgba(255, 255, 255, 0.5), 1px 1px 4px rgba(255, 255, 255, 0.5);
+    border-radius:10px;
+    padding:10px;
+    color:white;
+    font-size:0.9em;
+    flex:1;
+    z-index: -1;
+}
+
+aside h1 {
+	font-size:175%;
+    font-family:"QuickSand";
+}
+
+aside img {
+    margin-right:20px;
+}
+
+aside a:hover {
+	text-decoration:none;
+}
+
+aside p:last-child, #photo_zozor {
+    text-align:center;
+}
+
+#photo_zozor img {
+	border-radius:2px;
+    margin-right:32px;
+    box-shadow: -1px 1px 4px rgba(0, 0, 0, 0.5), 1px -1px 4px rgba(0, 0, 0, 0.5), -1px -1px 4px rgba(0, 0, 0, 0.5), 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+#mainaside::before {
+  content:"";
+  border-top:9px solid transparent;
+  border-bottom:9px solid transparent;
+  border-right:9px solid rgba(255, 255, 255, 0.5);
+  position:absolute;
+  top:48px;
+  left:-10px;
+}
+
+footer {
+  background-color: #000;
+  width: 100%;
+  height: 5%;
+  position: fixed;
+  bottom: 0;
+}
+
+footer p {
+  text-align: center;
+}
+
+#table {
+  width: 100%;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px outset rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+#table th {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  height: 32px;
+  padding: 0;
+}
+
+#table td {
+  text-align: center;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#table td a {
+  color: white;
+  text-decoration: none;
+}
+
+#table tr:last-child td {
+  text-align: center;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+  border-bottom: 0px;
+}
+
+#thn {
+  width: 40%;
+}
+
+#playeraside {
+  margin-left:20px;
+  margin-right: 20px;
+  height: 500px;
+}
+
+@font-face
+{
+    font-family: 'AlexBrush';
+      src: url('../fonts/orokin-regular-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face
+{
+    font-family: 'QuickSand';
+    src: url('../fonts/quicksand-regular-webfont.eot');
+    src: url('../fonts/quicksand-regular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/quicksand-regular-webfont.woff') format('woff'),
+         url('../fonts/quicksand-regular-webfont.ttf') format('truetype'),
+         url('../fonts/quicksand-regular-webfont.svg#BallparkWeiner') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}

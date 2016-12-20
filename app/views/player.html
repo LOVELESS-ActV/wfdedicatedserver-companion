@@ -1,0 +1,31 @@
+<section ng-controller="playerController">
+    <aside id="playeraside">
+      <!-- <table id="table">
+        <thead>
+          <th ng-click="(o == 'Name' ? o='-Name' : o='Name')">Name</th>
+          <th ng-click="(o == 'Kills' ? o='-Kills' : o='Kills')">Kills</th>
+          <th ng-click="(o == 'Deaths' ? o='-Deaths' : o='Deaths')">Deaths</th>
+          <th ng-click="(o == 'Kills/Deaths' ? o='-(Kills/Deaths)' : o='Kills/Deaths')">KDR</th>
+        </thead>
+        <tbody>
+          <tr ng-repeat="e in players | orderBy:'-Kills' | limitTo:15:0 | orderBy:o ">
+            <td><a href='' onclick="ViewFadeOut('/#player/{{e.Name}}')">{{e["Name"]}}</a></td>
+            <td>{{e["Kills"] | number}}</td>
+            <td>{{e["Deaths"] | number}}</td>
+            <td>{{e["KDR"] | number}}</td>
+          </tr>
+        </tbody>
+      </table> -->
+  <div style="margin:15px;">
+
+    <h1>Player : <span style="text-transform:capitalize;">{{player.Name}}</span></h1>
+    <div style="height:405px; overflow-y:scroll;">
+      <div ng-repeat="(property, value) in player" style="width:500px; margin-top:5px; margin-bottom:5px; font-size:22px; font-family:QuickSand;">
+        <span style="">{{property}}</span> : <span style="font-size">{{value}}</span>
+      </div>
+    </div>
+
+  </div>
+
+  </aside>
+</section>

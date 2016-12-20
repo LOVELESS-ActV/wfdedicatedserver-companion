@@ -1,9 +1,14 @@
 var fs = require('fs');
 var Discord = require('discord.io');
 var merge = require('gulp-merge-json');
+var express = require('express'),
+    server = express();
+var path = require('path');
 var isConfig = false;
 var token = '';
 var channels = [];
+//Feel free to change this to whatever you wish.
+var port = 8080;
 try {
   token = JSON.parse(fs.readFileSync("./config.ini").toString()).token;
   channels = JSON.parse(fs.readFileSync("./config.ini").toString()).channels;
@@ -27,7 +32,7 @@ var monthNames = ["January", "February", "March", "April", "May", "June",
 ];
 var weapons = require('./weapons.json');
 var maps = require('./maps.json');
-var db = {};
+var db = require('./players.json');
 
 setTimeout(function () {
   var bot = new Discord.Client({
@@ -48,19 +53,24 @@ setTimeout(function () {
       }
       try {
         // db = JSON.parse(fs.readFileSync('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json').toString());
-        db = JSON.parse('./players.json').toString());
       } catch(exc) {
         if(exc.code == "ENOENT") {
           // fs.writeFile('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json', '{}');
-          fs.writeFile('./players.json', '{}');
           setTimeout(function () {
             // db = JSON.parse(fs.readFileSync('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json').toString());
-            db = JSON.parse('./players.json').toString());
           }, 10);
         }
       }
     });
     SendToChat(bot.username+" has successfully initiated. Starting loging...");
+    server.use('/app', express.static(__dirname + '/app'));
+    server.use(express.static(__dirname));
+    server.get('/', function(req, res){
+      res.sendFile(path.join(__dirname + '/index.html'));
+    });
+
+    server.listen(port);
+    console.log('Server started. Go to http://localhost:'+port+'/');
     lastline = "";
     fs.open(filename, 'r', function(err, fd) {
       fs.watchFile(filename, function(cstat, pstat) {
@@ -72,7 +82,6 @@ setTimeout(function () {
           lastline = bwrite[bwrite.length-1];
           bwrite.pop();
           write += bwrite.join("\n");
-          console.log(write);
           fs.writeFile(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log", write, function(err) {
             if(err) {
             return console.log(err);
@@ -281,6 +290,9 @@ function CheckKills() {
             kill.victim = "Unknown";
           }
         }
+      }
+      if (kill.killer == "a level 20 TURRET") {
+        kill.killer = "BunkersGrineerTurret";
       }
       kills.push(kill);
     }

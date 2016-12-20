@@ -1,0 +1,79 @@
+﻿h1, #logo {
+	width:50%;
+}
+
+h2 {
+	width:70%
+}
+
+#maintitle {
+	float:none;
+	margin-left:1%;
+	flex:1;
+}
+
+header {
+	display:block;
+  align-items: flex-end;
+	border-bottom:3px groove rgba(0, 0, 0, 0.7);
+	background-color:rgba(0, 0, 0, 0.8);
+	position: fixed;
+	top: 0;
+	min-height:180px;
+	width:100%;
+  margin-bottom: 2em;
+}
+
+header #logo {
+	position:relative;
+	top:1em;
+	left:3%;
+}
+
+nav ul {
+    display:block;
+	text-align:right;
+	margin-right:1em;
+	position:relative;
+	top:60%;
+}
+
+#mainview {
+  margin-top: 380px;
+}
+
+section {
+    display:block;
+    margin-bottom:2em;
+}
+
+article {
+    max-height:460px;
+	overflow:scroll;
+    margin-right:1em;
+    margin-bottom:2em;
+}
+
+aside {
+	margin-left:1em;
+    margin-right:1em;
+}
+
+#mainaside::before {
+  content:"";
+  border-left:9px solid transparent;
+  border-right:9px solid transparent;
+  border-bottom:9px solid rgba(255, 255, 255, 0.5);
+  position:absolute;
+  top:-18px;
+  left:20px;
+}
+
+footer p {
+  text-align: center;
+}
+
+#listes_amis {
+	display:block;
+    margin-left:0em;
+}

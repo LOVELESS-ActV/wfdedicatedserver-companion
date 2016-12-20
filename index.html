@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html ng-app="DSApp">
+  <head>
+    <meta charset="utf-8">
+		<title>Warframe Dedicated Server StatPage</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-animate.js"></script>
+
+    <!-- Latest compiled and minified CSS -->
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous"> -->
+
+    <!-- Optional theme -->
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"> -->
+
+    <link rel="stylesheet" href="app/css/style.css" media="all"/>
+		<link rel="stylesheet" type="text/css" href="app/css/style_mobile.css" media="screen and (max-width:750px)"/>
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="app/app.js"></script>
+    <script src="app/controller/mainController.js"></script>
+    <script src="app/controller/menuController.js"></script>
+    <script src="app/controller/playerController.js"></script>
+    <script src="app/services/playersFactory.js"></script>
+    <style>
+    #container {
+      padding:15px;
+    }
+
+    nav {
+      padding: 15px;
+      padding-bottom: 0;
+      margin-bottom: 0 !important;
+    }
+
+    nav li {
+      margin-right: 8px;
+    }
+
+    #sbar {
+      display: flex;
+    }
+
+    #sname, #sgps, #sseats {
+      flex: 1;
+      border: 1px solid green
+    }
+
+    #sname {
+    }
+
+    #sname label{
+    float: left;
+    }
+
+    #sname input {
+    float: right;
+    }
+
+    #sgps {
+    }
+
+    #sgps label {
+    float: left;
+    }
+
+    #sgps input {
+    float: right;
+    }
+
+    #sseats {
+      text-align: center;
+    }
+
+    .red {
+      color:red;
+    }
+
+    .nav ul {
+      padding-left: 15px;
+      margin-bottom: 0;
+      display:flex;
+      list-style-type: none;
+    }
+
+    .radior {
+    }
+
+    </style>
+  </head>
+  <body ng-controller="mainController">
+    <div id="bg"></div>
+    <div id="bloc_page">
+      <header>
+        <div id="maintitle" >
+            <div id="logo">
+                <img src="http://vignette3.wikia.nocookie.net/warframe/images/6/65/FactionSigilConclaveLevel16.png/revision/latest/scale-to-width-down/120?cb=20151217134249" style="width:60px;"/>
+            </div>
+            <h1>Warframe</h1>
+            <h2>Dedicated Server Companion</h2>
+        </div>
+        <nav>
+          <ul>
+            <li><a class="nbord" onclick="ViewFadeOut('#/')">Home</a></li>
+            <li><a class="nbord" onclick="ViewFadeOut('#/top')">Top</a></li>
+            <li><a class="nbord" onclick="ViewFadeOut('#/all')">Full List</a></li>
+            <li><a class="nbord" onclick="ViewFadeOut('#/search')">Search</a></li>
+          </ul>
+        </nav>
+      </header>
+    </div>
+    <div id="mainview" ng-view>
+    </div>
+    <footer>
+      <p>Warframe and all related trademarks belongs to Digital Extremes.</p>
+    </footer>
+  </div>
+  <script type="text/javascript">
+    function GoToPlayer() {
+      $('.playerlink').each(function() {
+        path = '#/player/'+$(this).attr("path");
+        $(this).attr("onclick","ViewFadeOut('"+path+"')");
+      });
+    }
+    function ViewFadeOut(direction) {
+      $('#mainview').fadeOut();
+      setTimeout(function () {
+        window.location.replace(direction);
+        BGChange();
+        $('#mainview').hide();
+        $('#mainview').fadeIn();
+      }, 300);
+      if (direction == '#/all' || direction == '#/top') {
+        setTimeout(function () {
+          GoToPlayer();
+        }, 500);
+      }
+    }
+    function BGChange() {
+      var bg = ['http://i.imgur.com/yz1swZB.jpg', 'http://i.imgur.com/yjdcQlc.jpg', 'http://i.imgur.com/NY2Qs5Z.jpg', 'http://i.imgur.com/uR9N2b8.jpg', 'http://i.imgur.com/phZyfZo.jpg', 'http://i.imgur.com/3SRaK2u.jpg', 'http://i.imgur.com/edsA8LG.jpg'];
+      $('#bg').fadeTo(100, 0.5, function() {
+        $(this).css({'background':'url(' + bg[Math.floor(Math.random() * bg.length)] + ') no-repeat'});
+        $(this).css({'background-size':'cover'});
+      }).fadeTo(100, 1);
+    }
+  </script>
+  </body>
+</html>

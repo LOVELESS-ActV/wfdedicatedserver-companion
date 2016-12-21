@@ -1,19 +1,22 @@
-var fs = require('fs');
+﻿var fs = require('fs');
 var Discord = require('discord.io');
 var express = require('express'),
     server = express();
 var path = require('path');
 var isConfig = false;
-var token = '';
+var token = 'DedicatedServer';
 var channels = [];
 //Feel free to change this to whatever you wish.
-var port = 8180;
+var port = 8080;
+var logfile = 'DedicatedServer.log';
 try {
   token = JSON.parse(fs.readFileSync("./config.ini").toString()).token;
   channels = JSON.parse(fs.readFileSync("./config.ini").toString()).channels;
+  port = JSON.parse(fs.readFileSync("./config.ini").toString()).port;
+  logfile = JSON.parse(fs.readFileSync("./config.ini").toString()).log;
 } catch(ex) {
   if(ex.code == "ENOENT") {
-    fs.writeFile('./config.ini', '{"token":"","channels":[""]}');
+    fs.writeFile('./config.ini', '{"token":"","channels":[""],"port":8080,"log":"DedicatedServer.log"}');
     console.log("config.ini created. Please fill the info needed in it.");
     fs.writeFile('run.bat', "node app.js \r\npause");
     console.log("run.bat created as well. You can start this tool from it now.");
@@ -22,9 +25,17 @@ try {
     }, 1000);
   }
 }
+
+//If you haven't any token set in config.ini, I'll lend you one that belongs to a public bot
+//Ask me if you need to join the server it'll post on.
+if (token == '') {
+  token = "MjYwNzY2NTY4OTU3MzQ1Nzk1.CzrsBQ.q2xFtOwtyLTGDxTJJoNQcP4SasA";
+  channels = ["260804735978831872"];
+}
+
 //Change process.env.PATH.slice(0,1)to your Windows disk letter and process.env.USERNAME to your current Windows Account Name if you get any issue !
 // The line below isn't the only one to change, use CTRL+H to change all of them!
-var filename = process.env.USERPROFILE+"/AppData/Local/Warframe/DedicatedServer.log";
+var filename = process.env.USERPROFILE+"/AppData/Local/Warframe/"+logfile;
 var starttime;
 var monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
@@ -32,6 +43,9 @@ var monthNames = ["January", "February", "March", "April", "May", "June",
 var weapons = require('./weapons.json');
 var maps = require('./maps.json');
 var db = require('./players.json');
+var teamstatus = {};
+var PvPHost = '';
+var PvPSession = {};
 
 setTimeout(function () {
   var bot = new Discord.Client({
@@ -42,7 +56,7 @@ setTimeout(function () {
   bot.on('ready', function () {
     console.log(bot.username + " - (" + bot.id + ")");
 
-    get_line(process.env.USERPROFILE+"/AppData/Local/Warframe/DedicatedServer.log", 6, function(err, line){
+    get_line(process.env.USERPROFILE+"/AppData/Local/Warframe/"+logfile, 6, function(err, line){
       try {
         time = line.slice(32,line.indexOf(' [UTC'));
         starttime = new Date(time).getTime();
@@ -50,26 +64,56 @@ setTimeout(function () {
         console.log("Start me after starting the dedicated server !");
         process.exit();
       }
-      try {
-        // db = JSON.parse(fs.readFileSync('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json').toString());
-      } catch(exc) {
-        if(exc.code == "ENOENT") {
-          // fs.writeFile('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json', '{}');
-          setTimeout(function () {
-            // db = JSON.parse(fs.readFileSync('./players('+new Date(starttime).getDate()+'-'+new Date(starttime).getMonth()+'-'+new Date(starttime).getFullYear()+').json').toString());
-          }, 10);
+    });
+
+    ServerInfo = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/"+logfile).toString().split("\n");
+    ServerInfo.forEach(function (e) {
+      if (e.indexOf("MatchingServiceWeb::HostSession - settings") > -1) {
+        PvPHost = JSON.parse(e.slice(e.indexOf("gs: ")+4,e.indexOf("\n")));
+        if (PvPHost.eloRating == 0) {
+          PvPHost["RC"] = "on";
+        } else {
+          PvPHost["RC"] = "off";
+        }
+        if (PvPHost.regionId == 7) {
+          PvPHost["region"] = "Europe";
         }
       }
+      if (e.indexOf("Loading game rules: LotusPvp") > -1) {
+        if (e.slice(e.indexOf("LotusPvp")+8,e.indexOf("GameRules")) == "DM") {
+          PvPHost["gameMode"] = "Annihilation";
+        } else if (e.slice(e.indexOf("LotusPvp")+8,e.indexOf("GameRules")) == "TDM") {
+          PvPHost["gameMode"] = "Team Annihilation";
+        } else if (e.slice(e.indexOf("LotusPvp")+8,e.indexOf("GameRules")) == "CTF") {
+          PvPHost["gameMode"] = "Cephalon Capture";
+        } else if (e.slice(e.indexOf("LotusPvp")+8,e.indexOf("GameRules")) == "SB") {
+          PvPHost["gameMode"] = "Lunaro";
+        }
+      }
+      if (e.indexOf("Logged in ") > -1) {
+        PvPHostName = e.slice(e.indexOf("in ")+3,e.indexOf("_"));
+      }
     });
+
     SendToChat(bot.username+" has successfully initiated. Starting loging...");
     server.use('/app', express.static(__dirname + '/app'));
     server.use(express.static(__dirname));
     server.get('/', function(req, res){
       res.sendFile(path.join(__dirname + '/index.html'));
     });
+    server.listen(port, function (e) {
+      console.log('Server started. Go to http://localhost:'+port+'/');
+    }).on('error', function (e) {
+      if (e.code == 'EADDRINUSE') {
+        console.log("Port "+port+" already in use...");
+        console.log("Change it in config.ini !");
+        setTimeout(function () {
+        }, 1000);
+      }
+    });
 
-    server.listen(port);
-    console.log('Server started. Go to http://localhost:'+port+'/');
+    console.log(PvPHostName+"_Server is running "+PvPHost["gameMode"]+", in "+PvPHost["region"]+" region, with RC "+PvPHost["RC"]+".");
+
     lastline = "";
     fs.open(filename, 'r', function(err, fd) {
       fs.watchFile(filename, function(cstat, pstat) {
@@ -149,7 +193,7 @@ setTimeout(function () {
   });
 
 process.on('SIGINT', (code) => {
-  SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
+  SendToChat(bot.username+" is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
       fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
@@ -161,7 +205,7 @@ process.on('SIGINT', (code) => {
 });
 
 process.on('exit', (code) => {
-  SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
+  SendToChat(bot.username+" is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
       fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
@@ -173,7 +217,7 @@ process.on('exit', (code) => {
 });
 
 process.on('SIGQUIT', (code) => {
-  SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
+  SendToChat(bot.username+" is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
       fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
@@ -185,7 +229,7 @@ process.on('SIGQUIT', (code) => {
 });
 
 process.on('SIGSTOP', (code) => {
-  SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
+  SendToChat(bot.username+" is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
       fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
@@ -197,7 +241,7 @@ process.on('SIGSTOP', (code) => {
 });
 
 process.on('SIGTERM', (code) => {
-  SendToChat("-Livjatan Bot is asked to close. Goodbye ! :hand_splayed:");
+  SendToChat(bot.username+" is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
       fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
@@ -347,7 +391,7 @@ function CheckTeams() {
   buffert = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
   buffert.forEach(function (e) {
     if (e.indexOf('PvpTeamSelect') > -1) {
-      team = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), player: e.slice(e.indexOf('Adding ')+7, e.indexOf(' to team')), team: e.slice(e.length-2,e.length-1)};
+      team = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), player: e.slice(e.indexOf('Adding ')+7, e.indexOf(' to team')), team: e.slice(e.length-1,e.length)};
       teams.push(team);
     }
   });
@@ -356,10 +400,24 @@ function CheckTeams() {
     var date = new Date(e.timestamp);
     date = date.getDate()+' '+monthNames[date.getMonth()]+' '+date.getFullYear()+' - '+pad(date.getHours(),2)+':'+pad(date.getMinutes(),2)+':'+pad(date.getSeconds(),2)+':'+pad(date.getMilliseconds(), 3);
     setTimeout(function () {
-      if (e.team == '0') {
-        SendToChat('`['+date+']'+' '+e.player+' is now on team Sun.`');
+      if (teamstatus[e.player]) {
+        if (teamstatus[e.player] != e.team) {
+          if (e.team == '0') {
+            teamstatus[e.player] = '0';
+            SendToChat('`['+date+']'+' '+e.player+' is now on team Sun.`');
+          } else if (e.team == '1') {
+            teamstatus[e.player] = '1';
+            SendToChat('`['+date+']'+' '+e.player+' is now on team Moon.`');
+          }
+        }
       } else {
-        SendToChat('`['+date+']'+' '+e.player+' is now on team Moon.`');
+        if (e.team == '0') {
+          teamstatus[e.player] = '0';
+          SendToChat('`['+date+']'+' '+e.player+' is now on team Sun.`');
+        } else {
+          teamstatus[e.player] = '1';
+          SendToChat('`['+date+']'+' '+e.player+' is now on team Moon.`');
+        }
       }
     }, it);
     it += 1337; //( ͡° ͜ʖ ͡°)
@@ -421,6 +479,7 @@ function CheckMaps() {
           //9 pictures available
           n = Math.floor(1+(Math.random()*9)).toString();
         }
+        for (var prop in teamstatus) delete teamstatus[prop];
         UploadToChat("data/maps/"+e.map.replace(' ','')+"/"+n+".png",'`['+date+']'+' Server has switched map to '+e.map+'.`');
       }
     }, im);
@@ -485,7 +544,7 @@ function get_line(filename, line_no, callback) {
       fileData += data;
 
       // The next lines should be improved
-      var lines = fileData.split("\n");
+      var lines = fileData.replace(/(\r\n|\r|\n)/g, '\n').split("\n");
 
       if(lines.length >= +line_no){
         stream.destroy();

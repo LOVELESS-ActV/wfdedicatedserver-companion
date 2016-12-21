@@ -23,7 +23,7 @@
     "BoltoRifle": "Boltor",
     "PrimeBoltor": "Boltor Prime",
     "AHBoltor": "Telos Boltor",
-    "MK1Bo": "BoMk1",
+    "MK1Bo": "Mk1-Bo",
     "PrimeBoWeapon": "Bo Prime",
     "GrineerHandCannon": "Brakk",
     "Rifle": "Braton",
@@ -261,5 +261,7 @@
     "DualKamas": "Dual Kamas",
     "StalkerTwoGreatSword": "War",
     "VariantSnowBalls" : "Solstice Spheres",
-    "VariantXmasScythe" : "Solstice Scythe"
+    "VariantXmasScythe" : "Solstice Scythe",
+    "DualCleaverWeapon" : "Dual Cleaver",
+    "GrnFlameSpear" : "Javlok"
 }

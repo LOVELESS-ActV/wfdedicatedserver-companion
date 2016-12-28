@@ -66,15 +66,16 @@ setTimeout(function () {
       }
     });
 
-    ServerInfo = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/"+logfile).toString().split("\n");
+    ServerInfo = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/"+logfile).toString().replace(/(\r\n|\r|\n)/g, '\n').split("\n");
     ServerInfo.forEach(function (e) {
       if (e.indexOf("MatchingServiceWeb::HostSession - settings") > -1) {
-        PvPHost = JSON.parse(e.slice(e.indexOf("gs: ")+4,e.indexOf("\n")));
+        PvPHost = JSON.parse(e.slice(e.indexOf("gs: ")+4,e.length));
         if (PvPHost.eloRating == 0) {
           PvPHost["RC"] = "on";
         } else {
           PvPHost["RC"] = "off";
         }
+        PvPHost["region"] = "Unknown";
         if (PvPHost.regionId == 7) {
           PvPHost["region"] = "Europe";
         }
@@ -134,7 +135,9 @@ setTimeout(function () {
         setTimeout(function () {
           CheckKills();
           CheckJoins();
+          if (PvPHost["gameMode"] != "Annihilation") {
           CheckTeams();
+          }
           CheckDisconnects();
           CheckMaps();
         }, 100);

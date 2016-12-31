@@ -1,6 +1,6 @@
 <a href="http://livjatanserver.tk"><p align="center"><img src="http://i.imgur.com/EXYvYjW.png"></p></a>
 <h1 align="center">[Warframe Dedicated Server Companion](http://livjatanserver.tk)</h1>
-A small-yet-complete tool/bot for [Warframe Dedicated Servers](http://www.warframe.com), <br/>
+A small-yet-complete tool/bot for Warframe Dedicated Servers(http://www.warframe.com), <br/>
 using the [discord.io](https://github.com/izy521/discord.io) library.
 
 Made by [LOVELESS-Act.V](https://forums.warframe.com/profile/688319-loveless-actv/) / [-Livjatan](https://forums.warframe.com/profile/1792585-livjatan/), with kinds contributions from [Pythadragon](https://forums.warframe.com/profile/482706-pythadragon/) and [Kontrollo](https://forums.warframe.com/profile/647185-kontrollo/).

@@ -1,5 +1,5 @@
-<p align="center"><a href="http://livjatanserver.tk"><img src="http://i.imgur.com/EXYvYjW.png"></a></p>
-<h1 align="center">Warframe Dedicated Server Companion</h1>
+<a href="http://livjatanserver.tk"><p align="center"><img src="http://i.imgur.com/EXYvYjW.png"></p>
+<h1 align="center">Warframe Dedicated Server Companion</h1></a>
 A small-yet-complete tool/bot for [Warframe Dedicated Servers](http://www.warframe.com), <br/>
 using the [discord.io](https://github.com/izy521/discord.io) library.
 

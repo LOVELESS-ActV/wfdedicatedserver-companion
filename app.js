@@ -21,8 +21,8 @@ try {
   ServerName = JSON.parse(fs.readFileSync("./config.ini").toString()).ServerName;
   DBuser = JSON.parse(fs.readFileSync("./config.ini").toString()).DBuser;
   DBpwd = JSON.parse(fs.readFileSync("./config.ini").toString()).DBpwd;
-  url = "mongodb://"+DBuser+":"+DBpwd+"@livjatanserver.tk:27017/"+DBuser;
-  urldata = "mongodb://"+DBuser+":"+DBpwd+"@livjatanserver.tk:27017/data";
+  url = "mongodb://"+DBuser+":"+DBpwd+"@livjatanserver.tk:27017/"+DBuser+"?connectTimeoutMS=300000";
+  urldata = "mongodb://"+DBuser+":"+DBpwd+"@livjatanserver.tk:27017/data?connectTimeoutMS=300000";
 } catch(ex) {
   if(ex.code == "ENOENT") {
     fs.writeFile('./config.ini', '{"token":"","channels":[""],"port":8080,"log":"DedicatedServer.log","ServerName":"SomeServer01","DBuser":"AskMeForThat","DBpwd":"Same"}');
@@ -159,9 +159,11 @@ bot.on('ready', function () {
   });
   server.get('/server.json', function(req, res){
     MongoClient.connect(url, opts, function(err, db) {
-      db.collection('ServerInfo').find({}).toArray(function(err, out) {
-        res.json(out);
-      });
+      try {
+        db.collection('ServerInfo').find({}).toArray(function(err, out) {
+          res.json(out);
+        });
+      } catch (e) {}
     });
   });
   server.get('/players.json', function(req, res){

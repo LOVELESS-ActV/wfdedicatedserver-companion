@@ -1,0 +1,4 @@
+-gauss blur : 10.0
+-double
+-fusion
+-reduce opacity : 65.0

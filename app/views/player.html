@@ -1,27 +1,444 @@
 <section ng-controller="playerController">
-    <aside id="playeraside">
-      <!-- <table id="table">
-        <thead>
-          <th ng-click="(o == 'Name' ? o='-Name' : o='Name')">Name</th>
-          <th ng-click="(o == 'Kills' ? o='-Kills' : o='Kills')">Kills</th>
-          <th ng-click="(o == 'Deaths' ? o='-Deaths' : o='Deaths')">Deaths</th>
-          <th ng-click="(o == 'Kills/Deaths' ? o='-(Kills/Deaths)' : o='Kills/Deaths')">KDR</th>
-        </thead>
-        <tbody>
-          <tr ng-repeat="e in players | orderBy:'-Kills' | limitTo:15:0 | orderBy:o ">
-            <td><a href='' onclick="ViewFadeOut('/#player/{{e.Name}}')">{{e["Name"]}}</a></td>
-            <td>{{e["Kills"] | number}}</td>
-            <td>{{e["Deaths"] | number}}</td>
-            <td>{{e["KDR"] | number}}</td>
-          </tr>
-        </tbody>
-      </table> -->
-  <div style="margin:15px;">
+    <aside id="playeraside" style="margin-bottom:50px;">
+  <h1 style="text-align:center;">Player : <span style="text-transform:capitalize;">{{player.Name}}</span></h1>
+  <div style="float:right;display:flex;">
+    <div ng-click="FadeMO('favweaps')" ng-mouseleave="FadeML('favweaps')" style="height:auto;display:flex;">
+      <img id="favweap0" ng-if="favweaps[0]" src="app/img/weapons/{{favweaps[0]}}.png" title="{{favweaps[0]}}" style="width:80px;height:80px;float:right;border-radius:5px;padding-left:15px;margin-top:-64px;"/>
+      <img id="favweap1" ng-if="favweaps[1]" src="app/img/weapons/{{favweaps[1]}}.png" title="{{favweaps[1]}}" style="width:80px;height:80px;float:right;border-radius:5px;padding-left:15px;margin-top:-64px;"/>
+    </div>
+    <div id="mrank" ng-if="rank">
+      <img src="app/img/ranks/{{rank}}.png" title="Mastery Rank {{rank}}" width="80" style="float:right;border-radius:5px;margin-left:15px;margin-top:-64px;" ng-click="FadeMO('rank')" ng-mouseleave="FadeML('rank')"/>
+    </div>
+    <div id="srank" ng-if="srank">
+      <img src="app/img/sranks/{{srank}}.png" title="Server's top {{srank}}" width="80" style="float:right;border-radius:5px;margin-left:15px;margin-top:-64px;" ng-click="FadeMO('srank')" ng-mouseleave="FadeML('srank')"/>
+    </div>
+    <div id="avatar" ng-if="hasAvatar">
+      <img src="app/img/{{player.Name}}.jpg" width="80" style="float:right;border-radius:25px;margin-left:15px;margin-top:-64px;" />
+    </div>
+  </div>
+  <br/>
+  <div style="display:flex;float:right;margin-top:10px;font-size:14px;font-family:'QuickSand';font-weight:bold;">
+  <span id="favweapsh" style="background-color:rgba(0, 0, 0, 0.5);text-align:center;opacity:0;width:144px;border:1px outset rgba(255, 255, 255, 0.16);border-radius:6px;padding:5px;margin-right:43px;" ng-if="favweaps[1] && favweaps[0]">Favorite Weapons</span>
+  <span id="rankh" style="background-color:rgba(0, 0, 0, 0.5);text-align:center;opacity:0;width:103px;border:1px outset rgba(255, 255, 255, 0.16);border-radius:6px;padding:5px;font-size:13px;margin-right:3px;" ng-if="rank">In-Game Rank</span>
+  <span id="srankh" style="background-color:rgba(0, 0, 0, 0.5);text-align:center;opacity:0;width:97px;border:1px outset rgba(255, 255, 255, 0.16);border-radius:6px;padding:5px;margin-right:6px;" ng-if="srank">Server Rank</span>
+  <span ng-if="hasAvatar" style="margin-right:115px;"></span>
+  </div>
 
-    <h1>Player : <span style="text-transform:capitalize;">{{player.Name}}</span></h1>
-    <div style="height:405px; overflow-y:scroll;">
-      <div ng-repeat="(property, value) in player" style="width:500px; margin-top:5px; margin-bottom:5px; font-size:22px; font-family:QuickSand;">
-        <span style="">{{property}}</span> : <span style="font-size">{{value}}</span>
+  <div style="margin-bottom:64px;"></div>
+
+  <div style="margin:15px;display:flex;margin-bottom:8px;">
+
+    <div style="width:49.95%;">
+      <div id="playerstats" style="height:405px;">
+        <div class="plist" ng-repeat="(property, value) in player" style="margin-top:5px; margin-bottom:5px; font-size:22px; font-family:QuickSand;">
+          <div class="plist-e" data-sid={{property.slice(0,6)}} id="{{property.slice(0,6)}}"><span>{{property.replace("KillOn","Kills On ").replace("DeathBy","Deaths By ").replace("KillsWith","Kills With ")}}</span> : <span style="font-size">{{value}}</span></div>
+        </div>
+        <div class="nlist" style="margin-top:5px; margin-bottom:5px; font-family:QuickSand;">
+          <div><span>Name</span> : <span style="font-size">{{player.Name}}</span></div>
+          <div><span>Kills</span> : <span style="font-size">{{player.Kills}}</span></div>
+          <div><span>Deaths</span> : <span style="font-size">{{player.Deaths}}</span></div>
+          <div><span>KDR</span> : <span style="font-size">{{player.KDR}}</span></div>
+          <div><span>Nemes{{nemesism}}</span> : <span style="font-size">{{nemesis}}</span></div>
+          <div><span>Punching Bag{{punchingbagm}}</span> : <span style="font-size">{{punchingbag}}</span></div>
+          <div><span>Weapon{{weaponofchoicem}} of choice</span> : <span style="font-size">{{weaponofchoice}}</span></div>
+          <div><span>Despised Weapon{{despisedweaponm}}</span> : <span style="font-size">{{despisedweapon}}</span></div>
+        </div>
+        <ul class="tab">
+         <li><a id="TKillWT" class="tablinks" ng-click="openItems('TKillW')">Kills With Weapons</a></li>
+         <li><a id="TKillsOT" class="tablinks" ng-click="openItems('TKillsO')">Kills On Players</a></li>
+         <li><a id="TDeathsWT" class="tablinks" ng-click="openItems('TDeathsW')">Deaths By Weapons</a></li>
+         <li><a id="TDeathsBT" class="tablinks" ng-click="openItems('TDeathsB')">Deaths By Players</a></li>
+        </ul>
+
+        <table id="TKillW" class="tabcontent">
+          <thead>
+
+          </thead>
+          <tbody id="TKillWBody">
+
+          </tbody>
+        </table>
+
+        <table id="TKillsO" class="tabcontent">
+          <thead>
+
+          </thead>
+          <tbody id="TKillsOBody">
+
+          </tbody>
+        </table>
+
+        <table id="TDeathsW" class="tabcontent">
+          <thead>
+
+          </thead>
+          <tbody id="TDeathsWBody">
+
+          </tbody>
+        </table>
+
+        <table id="TDeathsB" class="tabcontent">
+          <thead>
+
+          </thead>
+          <tbody id="TDeathsBBody">
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div style="width:0.1%;margin-right:10px;margin-left:5px;" ng-style="separator"></div>
+
+    <div style="width:49.95%;margin-top:15px;padding-left:15px;" id="achievements" ng-if="player">
+
+      <div class="trophy_killingspree" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="killingspree1" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyKillingspree1" ng-click="fades(['#killingspree1text','#killingspree1texton'])"/>
+          <img id="killingspree1_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyKillingspree1" ng-click="fades(['#killingspree1text','#killingspree1texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyKillingspree1 ? ' ×'+player.hasTrophyKillingspree1 : '')}}</i>
+          <br/><br/>
+          <span id="killingspree1text">Killing spree</span>
+          <span id="killingspree1texton" style="display:none;margin-left:2px;margin-right:2px">Kill 5 enemies without dying in a match</span>
+        </div>
+        <div class="trophy_2">
+          <img id="killingspree2" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyKillingspree2" ng-click="fades(['#killingspree2text','#killingspree2texton'])"/>
+          <img id="killingspree2_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyKillingspree2" ng-click="fades(['#killingspree2text','#killingspree2texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyKillingspree2 ? ' ×'+player.hasTrophyKillingspree2 : '')}}</i>
+          <br/><br/>
+          <span id="killingspree2text">Unstoppable</span>
+          <span id="killingspree2texton" style="display:none;margin-left:2px;margin-right:2px">Kill 10 enemies without dying in a match</span>
+        </div>
+        <div class="trophy_3">
+          <img id="killingspree3" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyKillingspree3" ng-click="fades(['#killingspree3text','#killingspree3texton'])"/>
+          <img id="killingspree3_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyKillingspree3" ng-click="fades(['#killingspree3text','#killingspree3texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyKillingspree3 ? ' ×'+player.hasTrophyKillingspree3 : '')}}</i>
+          <br/><br/>
+          <span id="killingspree3text">Untouchable</span>
+          <span id="killingspree3texton" style="display:none;margin-left:2px;margin-right:2px">Kill 15 enemies without dying in a match</span>
+        </div>
+        <div class="trophy_4">
+          <img id="killingspree4" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyKillingspree4" ng-click="fades(['#killingspree4text','#killingspree4texton'])"/>
+          <img id="killingspree4_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyKillingspree4" ng-click="fades(['#killingspree4text','#killingspree4texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyKillingspree4 ? ' ×'+player.hasTrophyKillingspree4 : '')}}</i>
+          <br/><br/>
+          <span id="killingspree4text">Invincible</span>
+          <span id="killingspree4texton" style="display:none;margin-left:2px;margin-right:2px">Kill 20 enemies without dying in a match</span>
+        </div>
+        <div class="trophy_5">
+          <img id="killingspree5" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyKillingspree5" ng-click="fades(['#killingspree5text','#killingspree5texton'])"/>
+          <img id="killingspree5_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyKillingspree5" ng-click="fades(['#killingspree5text','#killingspree5texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyKillingspree5 ? ' ×'+player.hasTrophyKillingspree5 : '')}}</i>
+          <br/><br/>
+          <span id="killingspree5text" style="margin-right:4px;">Flawless victory</span>
+          <span id="killingspree5texton" style="display:none;margin-left:2px;margin-right:2px">Kill 25 enemies without dying in a match</span>
+        </div>
+        <div class="trophy_6">
+          <img id="killingspree6" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyKillingspree6" ng-click="fades(['#killingspree6text','#killingspree6texton'])"/>
+          <img id="killingspree6_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyKillingspree6" ng-click="fades(['#killingspree6text','#killingspree6texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyKillingspree6 ? ' ×'+player.hasTrophyKillingspree6 : '')}}</i>
+          <br/><br/>
+          <span id="killingspree6text" >Overachiever</span>
+          <span id="killingspree6texton" style="display:none;margin-left:2px;margin-right:2px">Kill 30 enemies without dying in a match</span>
+        </div>
+      </div>
+      <div class="trophy_TDMtotalkills" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="TDMtotalkills1" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyTDMTotalKill1" ng-click="fades(['#TDMtotalkills1text','#TDMtotalkills1texton'])"/>
+          <img id="TDMtotalkills1_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyTDMTotalKill1" ng-click="fades(['#TDMtotalkills1text','#TDMtotalkills1texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyTDMTotalKill1 ? ' ×'+player.hasTrophyTDMTotalKill1 : '')}}</i>
+          <br/><br/>
+          <span id="TDMtotalkills1text">A worthy contribution</span>
+          <span id="TDMtotalkills1texton"  style="display:none;margin-left:2px;margin-right:2px">Kill 10 enemies in a team annihilation match</span>
+        </div>
+        <div class="trophy_2">
+          <img id="TDMtotalkills2" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyTDMTotalKill2" ng-click="fades(['#TDMtotalkills2text','#TDMtotalkills2texton'])"/>
+          <img id="TDMtotalkills2_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyTDMTotalKill2" ng-click="fades(['#TDMtotalkills2text','#TDMtotalkills2texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyTDMTotalKill2 ? ' ×'+player.hasTrophyTDMTotalKill2 : '')}}</i>
+          <br/><br/>
+          <span id="TDMtotalkills2text">Team player</span>
+          <span id="TDMtotalkills2texton"  style="display:none;margin-left:2px;margin-right:2px">Kill 20 enemies in a team annihilation match</span>
+        </div>
+        <div class="trophy_3">
+          <img id="TDMtotalkills3" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyTDMTotalKill3" ng-click="fades(['#TDMtotalkills3text','#TDMtotalkills3texton'])"/>
+          <img id="TDMtotalkills3_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyTDMTotalKill3" ng-click="fades(['#TDMtotalkills3text','#TDMtotalkills3texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyTDMTotalKill3 ? ' ×'+player.hasTrophyTDMTotalKill3 : '')}}</i>
+          <br/><br/>
+          <span id="TDMtotalkills3text">? ? ?</span>
+          <span id="TDMtotalkills3texton"  style="display:none;margin-left:2px;margin-right:2px">Kill 30 enemies in a team annihilation match</span>
+        </div>
+        <div class="trophy_4">
+          <img id="TDMtotalkills4" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyTDMTotalKill4" ng-click="fades(['#TDMtotalkills4text','#TDMtotalkills4texton'])"/>
+          <img id="TDMtotalkills4_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyTDMTotalKill4" ng-click="fades(['#TDMtotalkills4text','#TDMtotalkills4texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyTDMTotalKill4 ? ' ×'+player.hasTrophyTDMTotalKill4 : '')}}</i>
+          <br/><br/>
+          <span id="TDMtotalkills4text">? ? ?</span>
+          <span id="TDMtotalkills4texton"  style="display:none;margin-left:2px;margin-right:2px">Kill 40 enemies in a team annihilation match</span>
+        </div>
+        <div class="trophy_5">
+          <img id="TDMtotalkills5" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyTDMTotalKill5" ng-click="fades(['#TDMtotalkills5text','#TDMtotalkills5texton'])"/>
+          <img id="TDMtotalkills5_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyTDMTotalKill5" ng-click="fades(['#TDMtotalkills5text','#TDMtotalkills5texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyTDMTotalKill5 ? ' ×'+player.hasTrophyTDMTotalKill5 : '')}}</i>
+          <br/><br/>
+          <span id="TDMtotalkills5text">? ? ?</span>
+          <span id="TDMtotalkills5texton"  style="display:none;margin-left:2px;margin-right:2px">Kill 45 enemies in a team annihilation match</span>
+        </div>
+        <div class="trophy_6">
+          <img id="TDMtotalkills6" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyTDMTotalKill6" ng-click="fades(['#TDMtotalkills6text','#TDMtotalkills6texton'])"/>
+          <img id="TDMtotalkills6_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyTDMTotalKill6" ng-click="fades(['#TDMtotalkills6text','#TDMtotalkills6texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyTDMTotalKill6 ? ' ×'+player.hasTrophyTDMTotalKill6 : '')}}</i>
+          <br/><br/>
+          <span id="TDMtotalkills6text">Do I have to do all the work?</span>
+          <span id="TDMtotalkills6texton"  style="display:none;margin-left:2px;margin-right:2px">Kill 50 enemies in a team annihilation match</span>
+        </div>
+      </div>
+      <div class="trophy_fastkills" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="fastkills1" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyFastKill1" ng-click="fades(['#fastkills1text','#fastkills1texton'])"/>
+          <img id="fastkills1_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyFastKill1" ng-click="fades(['#fastkills1text','#fastkills1texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyFastKill1 ? ' ×'+player.hasTrophyFastKill1 : '')}}</i>
+          <br/><br/>
+          <span id="fastkills1text">Double kill</span>
+          <span id="fastkills1texton" style="display:none;margin-left:2px;margin-right:2px">Kill 2 enemies with less than 5 seconds between each</span>
+        </div>
+        <div class="trophy_2">
+          <img id="fastkills2" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyFastKill2" ng-click="fades(['#fastkills2text','#fastkills2texton'])"/>
+          <img id="fastkills2_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyFastKill2" ng-click="fades(['#fastkills2text','#fastkills2texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyFastKill2 ? ' ×'+player.hasTrophyFastKill2 : '')}}</i>
+          <br/><br/>
+          <span id="fastkills2text">Triple kill</span>
+          <span id="fastkills2texton" style="display:none;margin-left:2px;margin-right:2px">Kill 3 enemies with less than 5 seconds between each</span>
+        </div>
+        <div class="trophy_3">
+          <img id="fastkills3" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyFastKill3" ng-click="fades(['#fastkills3text','#fastkills3texton'])"/>
+          <img id="fastkills3_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyFastKill3" ng-click="fades(['#fastkills3text','#fastkills3texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyFastKill3 ? ' ×'+player.hasTrophyFastKill3 : '')}}</i>
+          <br/><br/>
+          <span id="fastkills3text">Ultra kill</span>
+          <span id="fastkills3texton" style="display:none;margin-left:2px;margin-right:2px">Kill 4 enemies with less than 5 seconds between each</span>
+        </div>
+        <div class="trophy_4">
+          <img id="fastkills4" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyFastKill4" ng-click="fades(['#fastkills4text','#fastkills4texton'])"/>
+          <img id="fastkills4_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyFastKill4" ng-click="fades(['#fastkills4text','#fastkills4texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyFastKill4 ? ' ×'+player.hasTrophyFastKill4 : '')}}</i>
+          <br/><br/>
+          <span id="fastkills4text">Mega kill</span>
+          <span id="fastkills4texton" style="display:none;margin-left:2px;margin-right:2px">Kill 5 enemies with less than 5 seconds between each</span>
+        </div>
+        <div class="trophy_5">
+          <img id="fastkills5" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyFastKill5" ng-click="fades(['#fastkills5text','#fastkills5texton'])"/>
+          <img id="fastkills5_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyFastKill5" ng-click="fades(['#fastkills5text','#fastkills5texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyFastKill5 ? ' ×'+player.hasTrophyFastKill5 : '')}}</i>
+          <br/><br/>
+          <span id="fastkills5text">Monster kill</span>
+          <span id="fastkills5texton" style="display:none;margin-left:2px;margin-right:2px">Kill 6 enemies with less than 5 seconds between each</span>
+        </div>
+      </div>
+      <div class="trophy_oneshots" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="oneshotkills1" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyOneshot1" ng-click="fades(['#os1text','#os1texton'])"/>
+          <img id="oneshotkills1_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyOneshot1" ng-click="fades(['#os1text','#os1texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyOneshot1 ? ' ×'+player.hasTrophyOneshot1 : '')}}</i>
+          <br/><br/>
+          <span id="os1text">Oneshot</span>
+          <span id="os1texton" style="display:none;margin-left:2px;margin-right:2px;">Kill an enemy in one shot</span>
+        </div>
+        <div class="trophy_2">
+          <img id="oneshotkills2" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyOneshot2" ng-click="fades(['#os2text','#os2texton'])"/>
+          <img id="oneshotkills2_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyOneshot2" ng-click="fades(['#os2text','#os2texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyOneshot2 ? ' ×'+player.hasTrophyOneshot2 : '')}}</i>
+          <br/><br/>
+          <span id="os2text">Two birds, two bullets. Uh ?</span>
+          <span id="os2texton" style="display:none;margin-left:2px;margin-right:2px;">Kill enemies in one shot,<br/>2 in a row</span>
+        </div>
+        <div class="trophy_3">
+          <img id="oneshotkills3" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyOneshot3" ng-click="fades(['#os3text','#os3texton'])"/>
+          <img id="oneshotkills3_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyOneshot3" ng-click="fades(['#os3text','#os3texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyOneshot3 ? ' ×'+player.hasTrophyOneshot3 : '')}}</i>
+          <br/><br/>
+          <span id="os3text" style="padding-left:6px;padding-right:6px;">Ain't nobody got time for more bullets.</span>
+          <span id="os3texton" style="display:none;margin-left:2px;margin-right:2px;">Kill enemies in one shot,<br/>3 in a row</span>
+        </div>
+      </div>
+      <div class="trophy_totalkills" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="totalkills1" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyTotalKill1" ng-click="fades(['#totalkills1text','#totalkills1texton'])"/>
+          <img id="totalkills1_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyTotalKill1" ng-click="fades(['#totalkills1text','#totalkills1texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyTotalKill1 ? ' ×'+player.hasTrophyTotalKill1 : '')}}</i>
+          <br/><br/>
+          <span id="totalkills1text">Just getting started</span>
+          <span id="totalkills1texton" style="display:none;margin-left:2px;margin-right:2px;">Kill 10 enemies or more in an annihilation match</span>
+        </div>
+        <div class="trophy_2">
+          <img id="totalkills2" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyTotalKill2" ng-click="fades(['#totalkills2text','#totalkills2texton'])"/>
+          <img id="totalkills2_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyTotalKill2" ng-click="fades(['#totalkills2text','#totalkills2texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyTotalKill2 ? ' ×'+player.hasTrophyTotalKill2 : '')}}</i>
+          <br/><br/>
+          <span id="totalkills2text">Almost there</span>
+          <span id="totalkills2texton" style="display:none;margin-left:2px;margin-right:2px;">Kill 15 enemies or more in an annihilation match</span>
+        </div>
+        <div class="trophy_3">
+          <img id="totalkills3" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyTotalKill3" ng-click="fades(['#totalkills3text','#totalkills3texton'])"/>
+          <img id="totalkills3_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyTotalKill3" ng-click="fades(['#totalkills3text','#totalkills3texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyTotalKill3 ? ' ×'+player.hasTrophyTotalKill3 : '')}}</i>
+          <br/><br/>
+          <span id="totalkills3text">Match win</span>
+          <span id="totalkills3texton" style="display:none;margin-left:2px;margin-right:2px;">Kill 25 enemies or more in an annihilation match</span>
+        </div>
+      </div>
+      <div class="trophy_overkill" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="overkill1" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyOverkill1" ng-click="fades(['#overkill1text','#overkill1texton'])"/>
+          <img id="overkill1_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyOverkill1" ng-click="fades(['#overkill1text','#overkill1texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyOverkill1 ? ' ×'+player.hasTrophyOverkill1 : '')}}</i>
+          <br/><br/>
+          <span id="overkill1text">Overkill</span>
+          <span id="overkill1texton" style="display:none;margin-left:2px;margin-right:2px;">Kill an enemy with over 100 damage remaining</span>
+        </div>
+        <div class="trophy_2">
+          <img id="overkill2" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyOverkill2" ng-click="fades(['#overkill2text','#overkill2texton'])"/>
+          <img id="overkill2_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyOverkill2" ng-click="fades(['#overkill2text','#overkill2texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyOverkill2 ? ' ×'+player.hasTrophyOverkill2 : '')}}</i>
+          <br/><br/>
+          <span id="overkill2text">Sacrilegious fiend</span>
+          <span id="overkill2texton" style="display:none;margin-left:2px;margin-right:2px;">Kill an enemy with over 200 damage remaining</span>
+        </div>
+        <div class="trophy_3">
+          <img id="overkill3" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyOverkill3" ng-click="fades(['#overkill3text','#overkill3texton'])"/>
+          <img id="overkill3_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyOverkill3" ng-click="fades(['#overkill3text','#overkill3texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyOverkill3 ? ' ×'+player.hasTrophyOverkill3 : '')}}</i>
+          <br/><br/>
+          <span id="overkill3text">Return to dust</span>
+          <span id="overkill3texton" style="display:none;margin-left:2px;margin-right:2px;">Kill an enemy with over 300 damage remaining</span>
+        </div>
+      </div>
+      <div class="trophy_enemyKDR" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="enemyKDR1" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyEnemyKDR1" ng-click="fades(['#enemyKDR1text','#enemyKDR1texton'])"/>
+          <img id="enemyKDR1_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyEnemyKDR1" ng-click="fades(['#enemyKDR1text','#enemyKDR1texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyEnemyKDR1 ? ' ×'+player.hasTrophyEnemyKDR1 : '')}}</i>
+          <br/><br/>
+          <span id="enemyKDR1text">Newbies farmer</span>
+          <span id="enemyKDR1texton" style="display:none;margin-left:2px;margin-right:2px;">Kill 10 enemies or more in a match with a majority on players with less than 1.0 KDR</span>
+        </div>
+        <div class="trophy_2">
+          <img id="enemyKDR2" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyEnemyKDR2" ng-click="fades(['#enemyKDR2text','#enemyKDR2texton'])"/>
+          <img id="enemyKDR2_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyEnemyKDR2" ng-click="fades(['#enemyKDR2text','#enemyKDR2texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyEnemyKDR2 ? ' ×'+player.hasTrophyEnemyKDR2 : '')}}</i>
+          <br/><br/>
+          <span id="enemyKDR2text">enemyKDR_2</span>
+          <span id="enemyKDR2texton" style="display:none;margin-left:2px;margin-right:2px;">Kill 10 enemies or more in a match with a majority on players with more than 2.0 KDR</span>
+        </div>
+        <div class="trophy_3">
+          <img id="enemyKDR3" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyEnemyKDR3" ng-click="fades(['#enemyKDR3text','#enemyKDR3texton'])"/>
+          <img id="enemyKDR3_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyEnemyKDR3" ng-click="fades(['#enemyKDR3text','#enemyKDR3texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyEnemyKDR3 ? ' ×'+player.hasTrophyEnemyKDR3 : '')}}</i>
+          <br/><br/>
+          <span id="enemyKDR3text">Threatening entity</span>
+          <span id="enemyKDR3texton" style="display:none;margin-left:2px;margin-right:2px;">Kill 10 enemies or more in a match with a majority on players with more than 3.0 KDR</span>
+        </div>
+      </div>
+      <div class="trophy_punchthrough" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="punchthrough1" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyPunchthrough1" ng-click="fades(['#punchthrough1text','#punchthrough1texton'])"/>
+          <img id="punchthrough1_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyPunchthrough1" ng-click="fades(['#punchthrough1text','#punchthrough1texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyPunchthrough1 ? ' ×'+player.hasTrophyPunchthrough1 : '')}}</i>
+          <br/><br/>
+          <span id="punchthrough1text">Collateral damage</span>
+          <span id="punchthrough1texton" style="display:none;">Kill 2 enemies with a single shot</span>
+        </div>
+        <div class="trophy_2">
+          <img id="punchthrough2" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyPunchthrough2" ng-click="fades(['#punchthrough2text','#punchthrough2texton'])"/>
+          <img id="punchthrough2_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyPunchthrough2" ng-click="fades(['#punchthrough2text','#punchthrough2texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyPunchthrough2 ? ' ×'+player.hasTrophyPunchthrough2 : '')}}</i>
+          <br/><br/>
+          <span id="punchthrough2text">Trifecta</span>
+          <span id="punchthrough2texton" style="display:none;">Kill 3 enemies with a single shot</span>
+        </div>
+      </div>
+      <div class="trophy_explosions" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="explosions1" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyExplosion1" ng-click="fades(['#explosions1text','#explosions1texton'])"/>
+          <img id="explosions1_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyExplosion1" ng-click="fades(['#explosions1text','#explosions1texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyExplosion1 ? ' ×'+player.hasTrophyExplosion1 : '')}}</i>
+          <br/><br/>
+          <span id="explosions1text">Demolitionist</span>
+          <span id="explosions1texton" style="display:none;">Kill 2 enemies with a single explosion</span>
+        </div>
+        <div class="trophy_2">
+          <img id="explosions2" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyExplosion2" ng-click="fades(['#explosions2text','#explosions2texton'])"/>
+          <img id="explosions2_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyExplosion2" ng-click="fades(['#explosions2text','#explosions2texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyExplosion2 ? ' ×'+player.hasTrophyExplosion2 : '')}}</i>
+          <br/><br/>
+          <span id="explosions2text">Demolitions expert</span>
+          <span id="explosions2texton" style="display:none;">Kill 3 enemies with a single explosion</span>
+        </div>
+      </div>
+      <div class="trophy_mutualkill" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="mutual1" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyMutualKill1" ng-click="fades(['#mutual1text','#mutual1texton'])"/>
+          <img id="mutual1_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyMutualKill1" ng-click="fades(['#mutual1text','#mutual1texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyMutualKill1 ? ' ×'+player.hasTrophyMutualKill1 : '')}}</i>
+          <br/><br/>
+          <span id="mutual1text">Mutually assured destruction</span>
+          <span id="mutual1texton" style="display:none;">Kill an enemy at the same time as they kill you</span>
+        </div>
+        <div class="trophy_2">
+          <img id="mutual2" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyMutualKill2" ng-click="fades(['#mutual2text','#mutual2texton'])"/>
+          <img id="mutual2_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyMutualKill2" ng-click="fades(['#mutual2text','#mutual2texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyMutualKill2 ? ' ×'+player.hasTrophyMutualKill2 : '')}}</i>
+          <br/><br/>
+          <span id="mutual2text">Mexican Standoff</span>
+          <span id="mutual2texton" style="display:none;">Kill an enemy as they kill someone else who then kills you, all at the same time</span>
+        </div>
+      </div>
+      <div class="trophy_revenge" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="revenge1" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyRevenge" ng-click="fades(['#revengetext','#revengetexton'])"/>
+          <img id="revenge1_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyRevenge" ng-click="fades(['#revengetext','#revengetexton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyRevenge ? ' ×'+player.hasTrophyRevenge : '')}}</i>
+          <br/><br/>
+          <span id="revengetext">Back from the grave</span>
+          <span id="revengetexton" style="display:none;">Kill the enemy who killed you last</span>
+        </div>
+        <div class="trophy_2">
+          <img id="revenge2" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyRespawnKill2" ng-click="fades(['#revenge2text','#revenge2texton'])"/>
+          <img id="revenge2_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyRespawnKill2" ng-click="fades(['#revenge2text','#revenge2texton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyRespawnKill2 ? ' ×'+player.hasTrophyRespawnKill2 : '')}}</i>
+          <br/><br/>
+          <span id="revenge2text">Vengeful Revenant</span>
+          <span id="revenge2texton" style="display:none;">Kill the enemy who killed you last within 5 seconds of respawning</span>
+        </div>
+      </div>
+      <div class="trophy_sniperkill" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="sniperkill" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophySniperHS" ng-click="fades(['#snipertext','#snipertexton'])"/>
+          <img id="sniperkill_on" src="app/img/img_trans.gif" ng-if="player.hasTrophySniperHS" ng-click="fades(['#snipertext','#snipertexton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophySniperHS ? ' ×'+player.hasTrophySniperHS : '')}}</i>
+          <br/><br/>
+          <span id="snipertext">Sniper Headshot</span>
+          <span id="snipertexton" style="display:none;">Kill an enemy with a sniper by headshot</span>
+        </div>
+      </div>
+      <div class="trophy_staffkill" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="staffkill" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyStaffKill" ng-click="fades(['#stafftext','#stafftexton'])"/>
+          <img id="staffkill_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyStaffKill" ng-click="fades(['#stafftext','#stafftexton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyStaffKill ? ' ×'+player.hasTrophyStaffKill : '')}}</i>
+          <br/><br/>
+          <span id="stafftext">Rage against the machine</span>
+          <span id="stafftexton" style="display:none;">Kill a member of the Digital Extremes staff with a [DE] tag</span>
+        </div>
+      </div>
+      <div class="trophy_respawnkill" style="display:flex;justify-content:center;">
+        <div class="trophy_1">
+          <img id="respawnkill" src="app/img/img_trans.gif" style="opacity:0.4;" ng-if="!player.hasTrophyRespawnKill1" ng-click="fades(['#respawnkilltext','#respawnkilltexton'])"/>
+          <img id="respawnkill_on" src="app/img/img_trans.gif" ng-if="player.hasTrophyRespawnKill1" ng-click="fades(['#respawnkilltext','#respawnkilltexton'])"/>
+          <i style="position:absolute;margin-top:64px;margin-left:-20px;font-family:'QuickSand';font-size:12px;text-shadow:0 0 1px rgba(0,0,0,0.6), 0 0 8px white">{{(player.hasTrophyRespawnKill1 ? ' ×'+player.hasTrophyRespawnKill1 : '')}}</i>
+          <br/><br/>
+          <span id="respawnkilltext">Respawn_Kill</span>
+          <span id="respawnkilltexton" style="display:none;">Kill an enemy within 5 seconds of respawning</span>
+        </div>
       </div>
     </div>
 

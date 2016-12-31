@@ -2,7 +2,7 @@
 <html ng-app="DSApp">
   <head>
     <meta charset="utf-8">
-		<title>Warframe Dedicated Server StatPage</title>
+		<title>Warframe LivjatanServer StatPage</title>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-animate.js"></script>
@@ -17,12 +17,15 @@
 		<link rel="stylesheet" type="text/css" href="app/css/style_mobile.css" media="screen and (max-width:750px)"/>
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
     <script src="app/app.js"></script>
     <script src="app/controller/mainController.js"></script>
     <script src="app/controller/menuController.js"></script>
+    <script src="app/controller/listController.js"></script>
+    <script src="app/controller/gamesController.js"></script>
     <script src="app/controller/playerController.js"></script>
     <script src="app/services/playersFactory.js"></script>
+    <script src="app/services/serverFactory.js"></script>
+    <script src="app/services/gamesFactory.js"></script>
     <style>
     #container {
       padding:15px;
@@ -97,15 +100,17 @@
             <div id="logo">
                 <img src="http://vignette3.wikia.nocookie.net/warframe/images/6/65/FactionSigilConclaveLevel16.png/revision/latest/scale-to-width-down/120?cb=20151217134249" style="width:60px;"/>
             </div>
-            <h1>Warframe</h1>
+            <h1>-Livjatan</h1>
             <h2>Dedicated Server Companion</h2>
         </div>
         <nav>
           <ul>
             <li><a class="nbord" onclick="ViewFadeOut('#/')">Home</a></li>
+            <li><a class="nbord" onclick="ViewFadeOut('#/games')">Last Games</a></li>
             <li><a class="nbord" onclick="ViewFadeOut('#/top')">Top</a></li>
             <li><a class="nbord" onclick="ViewFadeOut('#/all')">Full List</a></li>
             <li><a class="nbord" onclick="ViewFadeOut('#/search')">Search</a></li>
+            <li><a class="nbord" onclick="ViewFadeOut('#/credits')">Credits</a></li>
           </ul>
         </nav>
       </header>
@@ -113,16 +118,50 @@
     <div id="mainview" ng-view>
     </div>
     <footer>
+      <p id="playerson">Players Online : {{playerson.length}}/8 <i id="showplayerson" ng-if="playerson.length" ng-click="showplayers()"></i></p>
       <p>Warframe and all related trademarks belongs to Digital Extremes.</p>
+      <p id="serveron">
+        <span id="on" ng-if="true">The server is up, running {{server.gameMode}} in {{server.region}} with RC {{server.RC}}</span>
+        <span id="off" ng-if="false">The server is off, yet the webpage is on. This shouldn't be happening.</span>
+      </p>
     </footer>
+    <div id="playersonlist" ng-if="playerson.length">
+      <section>
+          <article>
+            <table id="table" ng-if="isDM">
+              <tbody>
+                <tr ng-repeat="player in playerson | orderBy">
+                  <td><a class="playerlink" path='{{playerson[$index]}}'>{{playerson[$index]}}</a></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="display:flex;" ng-if="!isDM">
+              <table id="table" style="width:50%;">
+                <thead>
+                  <th>Sun</th>
+                </thead>
+                <tbody>
+                  <tr ng-if="!isDM" ng-repeat="player in playerson | orderBy:'Name' | filter:'Sun'">
+                    <td><a class="playerlink" path='{{player.Name}}'>{{player.Name}}</a></td>
+                  </tr>
+                </tbody>
+              </table>
+              <table id="table" ng-if="!isDM" style="width:50%;">
+                <thead>
+                  <th>Moon</th>
+                </thead>
+                <tbody>
+                  <tr ng-if="!isDM" ng-repeat="player in playerson | orderBy:'Name' | filter:'Moon'">
+                    <td><a class="playerlink" path='{{player.Name}}'>{{player.Name}}</a></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+      </section>
+    </div>
   </div>
   <script type="text/javascript">
-    function GoToPlayer() {
-      $('.playerlink').each(function() {
-        path = '#/player/'+$(this).attr("path");
-        $(this).attr("onclick","ViewFadeOut('"+path+"')");
-      });
-    }
     function ViewFadeOut(direction) {
       $('#mainview').fadeOut();
       setTimeout(function () {
@@ -133,12 +172,63 @@
       }, 300);
       if (direction == '#/all' || direction == '#/top') {
         setTimeout(function () {
-          GoToPlayer();
+          // GoToPlayer();
         }, 500);
       }
     }
     function BGChange() {
-      var bg = ['http://i.imgur.com/yz1swZB.jpg', 'http://i.imgur.com/yjdcQlc.jpg', 'http://i.imgur.com/NY2Qs5Z.jpg', 'http://i.imgur.com/uR9N2b8.jpg', 'http://i.imgur.com/phZyfZo.jpg', 'http://i.imgur.com/3SRaK2u.jpg', 'http://i.imgur.com/edsA8LG.jpg'];
+      var bg = ['http://i.imgur.com/yz1swZB.jpg',
+      'http://i.imgur.com/yjdcQlc.jpg',
+      'http://i.imgur.com/NY2Qs5Z.jpg',
+      'http://i.imgur.com/uR9N2b8.jpg',
+      'http://i.imgur.com/phZyfZo.jpg',
+      'http://i.imgur.com/3SRaK2u.jpg',
+      'http://i.imgur.com/Tacl2Vt.jpg',
+      'http://i.imgur.com/cnjVmHe.jpg',
+      'http://i.imgur.com/1V2iDaI.jpg',
+      'http://i.imgur.com/dN4CS5r.jpg',
+      'http://i.imgur.com/20qUcCh.jpg',
+      'http://i.imgur.com/xCtVTGT.jpg',
+      'http://i.imgur.com/U5Zwlvb.jpg',
+      'http://i.imgur.com/xJyg3rj.jpg',
+      'http://i.imgur.com/yZ5J7QE.jpg',
+      'http://i.imgur.com/pgrJj0Z.jpg',
+      'http://i.imgur.com/DMBPQ0c.jpg',
+      'http://i.imgur.com/SUex1kP.jpg',
+      'http://i.imgur.com/PwXwYJp.jpg',
+      'http://i.imgur.com/ivM8VrP.jpg',
+      'http://i.imgur.com/ZwMof23.jpg',
+      'http://i.imgur.com/0mrAT8E.jpg',
+      'http://i.imgur.com/lVFwBXT.jpg',
+      'http://i.imgur.com/itvu0aI.jpg',
+      'http://i.imgur.com/FGO1lDx.jpg',
+      'http://i.imgur.com/OZ9ji5I.jpg',
+      'http://i.imgur.com/vVH8XGv.jpg',
+      'http://i.imgur.com/JnF4Ny3.jpg',
+      'http://i.imgur.com/MdVcWQQ.jpg',
+      'http://i.imgur.com/k7m0zpj.jpg',
+      'http://i.imgur.com/i5vUbr6.jpg',
+      'http://i.imgur.com/9sq6BjZ.jpg',
+      'http://i.imgur.com/nZnvlqi.jpg',
+      'http://i.imgur.com/JfC4bSA.jpg',
+      'http://i.imgur.com/5ItAYw2.jpg',
+      'http://i.imgur.com/s0Ea5UD.jpg',
+      'http://i.imgur.com/ZK8rjO1.jpg',
+      'http://i.imgur.com/JxG0J3Y.jpg',
+      'http://i.imgur.com/zWAX8Ed.jpg',
+      'http://i.imgur.com/ohLRCdI.jpg',
+      'http://i.imgur.com/j0pV5NQ.jpg',
+      'http://i.imgur.com/ylJCQ8p.jpg',
+      'http://i.imgur.com/Jt9YGDi.jpg',
+      'http://i.imgur.com/tIVO6D9.jpg',
+      'http://i.imgur.com/xdDRbNJ.jpg',
+      'http://i.imgur.com/dPYuLPb.jpg',
+      'http://i.imgur.com/J07L9vf.jpg',
+      'http://i.imgur.com/IUkNiof.jpg',
+      'http://i.imgur.com/2MjDZSa.jpg',
+      'http://i.imgur.com/EuKls2c.jpg',
+      'http://i.imgur.com/qDOjld3.jpg',
+      'http://i.imgur.com/edsA8LG.jpg'];
       $('#bg').fadeTo(100, 0.5, function() {
         $(this).css({'background':'url(' + bg[Math.floor(Math.random() * bg.length)] + ') no-repeat'});
         $(this).css({'background-size':'cover'});

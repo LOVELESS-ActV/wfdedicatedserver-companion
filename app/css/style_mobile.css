@@ -38,6 +38,11 @@ nav ul {
 	top:60%;
 }
 
+.nlist {
+	font-size: 16px;
+	line-height:181%;
+}
+
 #mainview {
   margin-top: 380px;
 }

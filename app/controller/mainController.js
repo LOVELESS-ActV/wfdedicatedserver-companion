@@ -1,9 +1,5 @@
 angular.module("DSApp")
-.controller("mainController", function ($scope, $location, playersFactory){
-
-  var data = playersFactory.getAll();
-
-  $scope.players = data;
+.controller("mainController", function ($scope, $location, serverFactory, $http){
 
   $('input[name="name"]').keyup(function(event){
     if(event.keyCode == 13){
@@ -11,45 +7,71 @@ angular.module("DSApp")
     }
   });
 
-  $scope.Search = function() {
-    results = [];
-    i=0;
-    $('#mainview').fadeOut();
-    data.forEach(function (e) {
-      i++;
-      if (e.Name.toLowerCase().indexOf($('input[name="name"]').val().toLowerCase()) > -1 && e.Name != NaN) {
-        results.push(e.Name);
-      }
-    });
-    setTimeout(function () {
-      if (results[1]) {
-        setTimeout(function () {
-          window.location.replace("#/search/results");
-          $('#mainview').hide();
-          setTimeout(function () {
-            $('#mainview').html('<div id="container"><section><article style="text-align:center;"><h1>Found multiple results : </h1>'+
-            Renderresults(results)
-            +'<br></article></section></div><br><br><br>');
-              $('#mainview').fadeIn();
-          }, 200);
-        }, 500);
-      } else {
-        if (results[0]) {
-          ViewFadeOut('#/player/'+results[0]);
-        } else {
-          $scope.searchname = $('input[name="name"]').val();
-          ViewFadeOut('#/player404');
+  $(document).ready(function () {
+    if ($("#teshin")) {
+      setTimeout(function () {
+        intro = Math.floor(Math.random()*7)+1;
+        $("#teshin").attr("src", "app/sfx/TeshinIntro"+intro+".ogg");
+        $('#teshin').prop("volume", 0.1);
+        if ($('#teshin')[0]) {
+          $('#teshin')[0].play();
         }
-      }
-    }, 1000);
-  }
+      }, 1000);
+    }
+  });
+  $scope.isDM = false;
 
-  function Renderresults(res) {
-    finalstring = '';
-    res.forEach(function (e) {
-      finalstring += '<div><a onclick="ViewFadeOut('+"'"+'#/player/'+e+"'"+')">'+e+'</a></div><br>';
-    })
-    return finalstring;
-  }
+  var datab = serverFactory.getAll();
+
+  setInterval(function () {
+    var databe = $http.get("server.json").then(function (data) {return data});
+    databe.then(function (data) {
+      if (data.data[0]["gameMode"] != "Annihilation") {
+        $scope.isDM = true;
+      }
+      $scope.playerson = data.data[0]["Players"];
+    });
+  }, 5000);
+
+  datab.then(function (data) {
+    if (data.data[0]["gameMode"] == "Annihilation") {
+      $scope.isDM = true;
+    }
+    $scope.playerson = data.data[0]["Players"];
+    $scope.server = data.data[0];
+    var rotated = false;
+    $scope.showplayers = function() {
+      var div = document.getElementById('showplayerson'),
+          deg = rotated ? 0 : -90;
+          num = 0;
+      div.style.webkitTransform = 'rotate('+deg+'deg)';
+      div.style.mozTransform    = 'rotate('+deg+'deg)';
+      div.style.msTransform     = 'rotate('+deg+'deg)';
+      div.style.oTransform      = 'rotate('+deg+'deg)';
+      div.style.transform       = 'rotate('+deg+'deg)';
+      if (rotated == false) {
+        document.getElementById('playersonlist').style.bottom= "0%";
+      } else {
+        num = $('#playersonlist [class*=playerlink]:visible').length;
+        if (num<4) {
+          $('#playersonlist').css("transition-delay","0.7s");
+          document.getElementById('playersonlist').style.bottom= "-20%";
+        } else {
+          $('#playersonlist').css("transition-delay","1s");
+          document.getElementById('playersonlist').style.bottom= "-40%";
+        }
+        $('#playersonlist').removeClass('transition');
+      }
+      rotated = !rotated;
+    }
+    setTimeout(function () {
+      if ($scope.playerson) {
+        $('.playerlink').click(function() {
+          path = '#/player/'+$(this).attr("path");
+          ViewFadeOut(path);
+        });
+      }
+    }, 500);
+  });
 
 });

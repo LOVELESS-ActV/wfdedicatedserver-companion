@@ -1,0 +1,139 @@
+<div id="container" ng-controller="gamesController">
+  <div id="gamestop">
+    <section>
+        <article style="display:flex;">
+          <div id="game1pic" style="display:flex; flex-direction:column">
+            <table id="table">
+              <tbody>
+                <tr>
+                  <th ng-click="(o == 'Name' ? o='-Name' : o='Name')">Name</th>
+                  <th ng-click="(o == 'Kills' ? o='-Kills' : o='Kills')">Kills</th>
+                  <th ng-click="(o == 'Deaths' ? o='-Deaths' : o='Deaths')">Deaths</th>
+                </tr>
+                <tr ng-repeat="e in game1players | orderBy:'-Kills' | limitTo:8:0 | orderBy:o ">
+                  <td><a class="playerlink" path='{{e.Name}}'>{{e["Name"]}}</a></td>
+                  <td>{{e["Kills"] | number}}</td>
+                  <td>{{e["Deaths"] | number}}</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <p><span class="datel">{{game1date[0]}}</span>{{game1map == "Cephalon Spires" ? "Cephalon Citadel" : game1map}}<span class="dater">{{game1date[1]}}</span></p>
+          </div>
+        </article>
+    </section>
+    <section>
+      <article style="display:flex;">
+        <div id="game2pic" style="display:flex; flex-direction:column">
+          <table id="table">
+            <tbody>
+              <tr>
+                <th ng-click="(o == 'Name' ? o='-Name' : o='Name')">Name</th>
+                <th ng-click="(o == 'Kills' ? o='-Kills' : o='Kills')">Kills</th>
+                <th ng-click="(o == 'Deaths' ? o='-Deaths' : o='Deaths')">Deaths</th>
+              </tr>
+              <tr ng-repeat="e in game2players | orderBy:'-Kills' | limitTo:8:0 | orderBy:o ">
+                <td><a class="playerlink" path='{{e.Name}}'>{{e["Name"]}}</a></td>
+                <td>{{e["Kills"] | number}}</td>
+                <td>{{e["Deaths"] | number}}</td>
+              </tr>
+            </tbody>
+          </table>
+          <br>
+          <p><span class="datel">{{game2date[0]}}</span>{{game2map == "Cephalon Spires" ? "Cephalon Citadel" : game2map}}<span class="dater">{{game2date[1]}}</span></p>
+        </div>
+      </article>
+    </section>
+    <section>
+      <article style="display:flex;">
+        <div id="game3pic" style="display:flex; flex-direction:column">
+          <table id="table">
+            <tbody>
+              <tr>
+                <th ng-click="(o == 'Name' ? o='-Name' : o='Name')">Name</th>
+                <th ng-click="(o == 'Kills' ? o='-Kills' : o='Kills')">Kills</th>
+                <th ng-click="(o == 'Deaths' ? o='-Deaths' : o='Deaths')">Deaths</th>
+              </tr>
+              <tr ng-repeat="e in game3players | orderBy:'-Kills' | limitTo:8:0 | orderBy:o ">
+                <td><a class="playerlink" path='{{e.Name}}'>{{e["Name"]}}</a></td>
+                <td>{{e["Kills"] | number}}</td>
+                <td>{{e["Deaths"] | number}}</td>
+              </tr>
+            </tbody>
+          </table>
+          <br>
+          <p><span class="datel">{{game3date[0]}}</span>{{game3map == "Cephalon Spires" ? "Cephalon Citadel" : game3map}}<span class="dater">{{game3date[1]}}</span></p>
+        </div>
+      </article>
+    </section>
+  </div>
+  <div id="gamesbottom">
+    <section>
+        <article style="display:flex;">
+          <div id="game4pic" style="display:flex; flex-direction:column">
+            <table id="table">
+              <tbody>
+                <tr>
+                  <th ng-click="(o == 'Name' ? o='-Name' : o='Name')">Name</th>
+                  <th ng-click="(o == 'Kills' ? o='-Kills' : o='Kills')">Kills</th>
+                  <th ng-click="(o == 'Deaths' ? o='-Deaths' : o='Deaths')">Deaths</th>
+                </tr>
+                <tr ng-repeat="e in game4players | orderBy:'-Kills' | limitTo:8:0 | orderBy:o ">
+                  <td><a class="playerlink" path='{{e.Name}}'>{{e["Name"]}}</a></td>
+                  <td>{{e["Kills"] | number}}</td>
+                  <td>{{e["Deaths"] | number}}</td>
+                </tr>
+              </tbody>
+            </table>
+            <br>
+            <p><span class="datel">{{game4date[0]}}</span>{{game4map == "Cephalon Spires" ? "Cephalon Citadel" : game4map}}<span class="dater">{{game4date[1]}}</span></p>
+          </div>
+        </article>
+    </section>
+    <section>
+      <article style="display:flex;">
+        <div id="game5pic" style="display:flex; flex-direction:column">
+          <table id="table">
+            <tbody>
+              <tr>
+                <th ng-click="(o == 'Name' ? o='-Name' : o='Name')">Name</th>
+                <th ng-click="(o == 'Kills' ? o='-Kills' : o='Kills')">Kills</th>
+                <th ng-click="(o == 'Deaths' ? o='-Deaths' : o='Deaths')">Deaths</th>
+              </tr>
+              <tr ng-repeat="e in game5players | orderBy:'-Kills' | limitTo:8:0 | orderBy:o ">
+                <td><a class="playerlink" path='{{e.Name}}'>{{e["Name"]}}</a></td>
+                <td>{{e["Kills"] | number}}</td>
+                <td>{{e["Deaths"] | number}}</td>
+              </tr>
+            </tbody>
+          </table>
+          <br>
+          <p><span class="datel">{{game5date[0]}}</span>{{game5map == "Cephalon Spires" ? "Cephalon Citadel" : game5map}}<span class="dater">{{game5date[1]}}</span></p>
+        </div>
+      </article>
+    </section>
+    <section>
+      <article style="display:flex;">
+        <div id="game6pic" style="display:flex; flex-direction:column">
+          <table id="table">
+            <tbody>
+              <tr>
+                <th ng-click="(o == 'Name' ? o='-Name' : o='Name')">Name</th>
+                <th ng-click="(o == 'Kills' ? o='-Kills' : o='Kills')">Kills</th>
+                <th ng-click="(o == 'Deaths' ? o='-Deaths' : o='Deaths')">Deaths</th>
+              </tr>
+              <tr ng-repeat="e in game6players | orderBy:'-Kills' | limitTo:8:0 | orderBy:o ">
+                <td><a class="playerlink" path='{{e.Name}}'>{{e["Name"]}}</a></td>
+                <td>{{e["Kills"] | number}}</td>
+                <td>{{e["Deaths"] | number}}</td>
+              </tr>
+            </tbody>
+          </table>
+          <br>
+          <p><span class="datel">{{game6date[0]}}</span>{{game6map == "Cephalon Spires" ? "Cephalon Citadel" : game6map }}<span class="dater">{{game6date[1]}}</span></p>
+        </div>
+      </article>
+    </section>
+  </div>
+</div>
+<br><br><br>

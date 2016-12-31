@@ -263,5 +263,8 @@
     "VariantSnowBalls" : "Solstice Spheres",
     "VariantXmasScythe" : "Solstice Scythe",
     "DualCleaverWeapon" : "Dual Cleaver",
-    "GrnFlameSpear" : "Javlok"
+    "GrnFlameSpear" : "Javlok",
+    "InfestedKogake" : "Hirudo",
+    "Infestation" : "Nidus",
+    "DualMagnus" : "AkMagnus"
 }

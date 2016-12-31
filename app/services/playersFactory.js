@@ -1,35 +1,36 @@
 angular.module('DSApp')
-  .factory('playersFactory', function () {
+  .factory('playersFactory', function ($http, $q) {
 
     var factory = {};
 
-    p=[];
-
-    $.ajax({
-      url:"players.json",
-      method:'GET',
-      success: function (data) {
-        Object.keys(data).map(function(objectKey, index) {
-          if (data[objectKey]["Kills"] == undefined) {
-            data[objectKey]["Kills"]=0;
-          }
-          if (data[objectKey]["Deaths"] == undefined) {
-            data[objectKey]["Deaths"]=0;
-          }
-          if (data[objectKey]["Kills"] == 0) {
-            data[objectKey]["KDR"] = Math.round(("0.5"/data[objectKey]["Deaths"]) * 100) / 100;
-          } else {
-            data[objectKey]["KDR"] = Math.round((data[objectKey]["Kills"]/data[objectKey]["Deaths"]) * 100) / 100;
-          }
-          p.push(data[objectKey]);
-        });
-      },
-      error: function () {}
+    var deferred = $q.defer();
+    $http.get("players.json").then(function (data) {
+      deferred.resolve(data);
     });
 
     factory.getAll = function () {
-      return p;
+      return deferred.promise;
     };
+
+    var playerkills = 0;
+    factory.getsrank = function (player) {
+      var allkills = [];
+      d = p.filter(function(el) {
+        return el.Name != "Map";
+      });
+      d.forEach(function (e) {
+        if (e.Name == player) {
+          playerkills = e.Kills;
+        }
+        allkills.push(e.Kills);
+      });
+      allkills.sort(function(a,b){return b - a});
+      return allkills.findIndex(pk)+1;
+    }
+
+    function pk(e) {
+      return e==playerkills;
+    }
 
     return factory;
 

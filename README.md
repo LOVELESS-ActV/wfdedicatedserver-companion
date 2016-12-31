@@ -26,11 +26,37 @@ go to https://discordapp.com/developers/applications/me and make yourself an app
 activate https://support.discordapp.com/hc/en-us/article_attachments/208086687/Appearances.png
 to get channels id by right clicking them !
 
-fill config.ini with the token and the channels ids
+fill config.ini with the token and the channels ids, also mind changing the logfilename (if applicable), the webserver port,
+and the servername(preferably one per server if you run multiples instances, eg. 1=>"Livjatan_Server00" 2=>"Livjatan_Server01")
+
+ask me for your DB logins
+
+add them in config.ini
 
 launch your dedicated server...
 
 node app.js
+```
+
+### Installation With RTU-Pack
+```
+notepad config.ini
+
+go to https://discordapp.com/developers/applications/me and make yourself an app to get a token, then
+
+activate https://support.discordapp.com/hc/en-us/article_attachments/208086687/Appearances.png
+to get channels id by right clicking them !
+
+fill config.ini with the token and the channels ids(those are optionals), also mind changing the logfilename (if applicable), the webserver port,
+and the servername(preferably one per server if you run multiples instances, eg. 1=>"Livjatan_Server00" 2=>"Livjatan_Server01").
+
+ask me for your DB logins
+
+add them in config.ini
+
+launch your dedicated server...
+
+open run.bat
 ```
 
 <p align="center">You're ready to go !<br/>
@@ -47,4 +73,10 @@ node app.js
 <img src="http://i.imgur.com/Tx9jR2z.png"><br/>
 <hr>
 <img src="http://i.imgur.com/qdR0iMG.png"><br/>
+<hr>
+<img src="http://i.imgur.com/Q1mF92C.jpg"><br/>
+<hr>
+<img src="http://i.imgur.com/8qoDoAm.jpg"><br/>
+<hr>
+<img src="http://i.imgur.com/pOK1Zcg.jpg"><br/>
 </p>

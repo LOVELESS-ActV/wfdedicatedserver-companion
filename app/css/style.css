@@ -314,14 +314,14 @@ footer #serveron {
   cursor: pointer;
 }
 
-#respawnkill, #staffkill, #sniperkill, #revenge1, #revenge2 {
-    background: url("../img/trophies/IconSheet.png") 0px -82px;
-    background-size : 600% 800%;
+#respawnkill, #sniperkill, #revenge1, #revenge2 {
+    background: url("../img/trophies/IconSheet1.png") 0px -82px;
+    background-size : 600% 900%;
 }
 
-#respawnkill_on, #staffkill_on, #sniperkill_on, #revenge1_on, #revenge2_on {
-    background: url("../img/trophies/IconSheet_on.png") 0px -82px;
-    background-size : 600% 800%;
+#respawnkill_on, #sniperkill_on, #revenge1_on, #revenge2_on {
+    background: url("../img/trophies/IconSheet1_on.png") 0px -82px;
+    background-size : 600% 900%;
 }
 
 /*One-level trophy*/
@@ -335,13 +335,23 @@ footer #serveron {
 }
 
 #sniperkill {
-    background: url("../img/trophies/IconSheet.png") 0px -574px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") 0px -656px;
+    background-size : 600% 900%;
 }
 
 #sniperkill_on {
-    background: url("../img/trophies/IconSheet_on.png") 0px -574px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") 0px -656px;
+    background-size : 600% 900%;
+}
+
+#staffkill {
+    background: url("../img/trophies/IconSheet1.png") -82px -656px;
+    background-size : 600% 900%;
+}
+
+#staffkill_on {
+    background: url("../img/trophies/IconSheet1_on.png") -82px -656px;
+    background-size : 600% 900%;
 }
 
 /*Two-level trophies*/
@@ -358,63 +368,63 @@ footer #serveron {
 }
 
 #punchthrough1 {
-    background: url("../img/trophies/IconSheet.png") -164px -492px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -164px -574px;
+    background-size : 600% 900%;
 }
 
 #punchthrough2 {
-    background: url("../img/trophies/IconSheet.png") -246px -492px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -246px -574px;
+    background-size : 600% 900%;
 }
 
 #punchthrough1_on {
-    background: url("../img/trophies/IconSheet_on.png") -164px -492px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -164px -574px;
+    background-size : 600% 900%;
 }
 
 #punchthrough2_on {
-    background: url("../img/trophies/IconSheet_on.png") -246px -492px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -246px -574px;
+    background-size : 600% 900%;
 }
 
 #explosions1 {
-    background: url("../img/trophies/IconSheet.png") -328px -492px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -328px -574px;
+    background-size : 600% 900%;
 }
 
 #explosions2 {
-    background: url("../img/trophies/IconSheet.png") -410px -492px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -410px -574px;
+    background-size : 600% 900%;
 }
 
 #explosions1_on {
-    background: url("../img/trophies/IconSheet_on.png") -328px -492px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -328px -574px;
+    background-size : 600% 900%;
 }
 
 #explosions2_on {
-    background: url("../img/trophies/IconSheet_on.png") -410px -492px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -410px -574px;
+    background-size : 600% 900%;
 }
 
 #mutual1 {
-    background: url("../img/trophies/IconSheet.png") 0px -492px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") 0px -574px;
+    background-size : 600% 900%;
 }
 
 #mutual2 {
-    background: url("../img/trophies/IconSheet.png") -82px -492px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -82px -574px;
+    background-size : 600% 900%;
 }
 
 #mutual1_on {
-    background: url("../img/trophies/IconSheet_on.png") 0px -492px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") 0px -574px;
+    background-size : 600% 900%;
 }
 
 #mutual2_on {
-    background: url("../img/trophies/IconSheet_on.png") -82px -492px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -82px -574px;
+    background-size : 600% 900%;
 }
 
 /*Three-level trophies*/
@@ -430,184 +440,131 @@ footer #serveron {
   margin-bottom: 38px;
 }
 
+.trophy_oneshots .trophy_1, .trophy_oneshots .trophy_2, .trophy_oneshots .trophy_3 {
+  margin-top: 80px;
+}
+
 #oneshotkills1 {
-    background: url("../img/trophies/IconSheet.png") 0px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") 0px -82px;
+    background-size : 600% 900%;
 }
 
 #oneshotkills2 {
-    background: url("../img/trophies/IconSheet.png") -82px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -82px -82px;
+    background-size : 600% 900%;
 }
 
 #oneshotkills3 {
-    background: url("../img/trophies/IconSheet.png") -164px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -164px -82px;
+    background-size : 600% 900%;
 }
 
 #oneshotkills1_on {
-    background: url("../img/trophies/IconSheet_on.png") 0px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") 0px -82px;
+    background-size : 600% 900%;
 }
 
 #oneshotkills2_on {
-    background: url("../img/trophies/IconSheet_on.png") -82px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -82px -82px;
+    background-size : 600% 900%;
 }
 
 #oneshotkills3_on {
-    background: url("../img/trophies/IconSheet_on.png") -164px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -164px -82px;
+    background-size : 600% 900%;
 }
 
 #totalkills1 {
-    background: url("../img/trophies/IconSheet.png") 0px -328px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") 0px -328px;
+    background-size : 600% 900%;
 }
 
 #totalkills2 {
-    background: url("../img/trophies/IconSheet.png") -82px -328px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -82px -328px;
+    background-size : 600% 900%;
 }
 
 #totalkills3 {
-    background: url("../img/trophies/IconSheet.png") -164px -328px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -164px -328px;
+    background-size : 600% 900%;
 }
 
 #totalkills1_on {
-    background: url("../img/trophies/IconSheet_on.png") 0px -328px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") 0px -410px;
+    background-size : 600% 900%;
 }
 
 #totalkills2_on {
-    background: url("../img/trophies/IconSheet_on.png") -82px -328px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -82px -410px;
+    background-size : 600% 900%;
 }
 
 #totalkills3_on {
-    background: url("../img/trophies/IconSheet_on.png") -164px -328px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -164px -410px;
+    background-size : 600% 900%;
 }
 
 #overkill1 {
-    background: url("../img/trophies/IconSheet.png") -246px -328px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -246px -410px;
+    background-size : 600% 900%;
 }
 
 #overkill2 {
-    background: url("../img/trophies/IconSheet.png") -328px -328px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -328px -410px;
+    background-size : 600% 900%;
 }
 
 #overkill3 {
-    background: url("../img/trophies/IconSheet.png") -410px -328px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -410px -410px;
+    background-size : 600% 900%;
 }
 
 #overkill1_on {
-    background: url("../img/trophies/IconSheet_on.png") -246px -328px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -246px -410px;
+    background-size : 600% 900%;
 }
 
 #overkill2_on {
-    background: url("../img/trophies/IconSheet_on.png") -328px -328px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -328px -410px;
+    background-size : 600% 900%;
 }
 
 #overkill3_on {
-    background: url("../img/trophies/IconSheet_on.png") -410px -328px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -410px -410px;
+    background-size : 600% 900%;
 }
 
 #enemyKDR1 {
-    background: url("../img/trophies/IconSheet.png") 0px -410px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") 0px -492px;
+    background-size : 600% 900%;
 }
 
 #enemyKDR2 {
-    background: url("../img/trophies/IconSheet.png") -82px -410px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -82px -492px;
+    background-size : 600% 900%;
 }
 
 #enemyKDR3 {
-    background: url("../img/trophies/IconSheet.png") -164px -410px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -164px -492px;
+    background-size : 600% 900%;
 }
 
 #enemyKDR1_on {
-    background: url("../img/trophies/IconSheet_on.png") 0px -410px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") 0px -492px;
+    background-size : 600% 900%;
 }
 
 #enemyKDR2_on {
-    background: url("../img/trophies/IconSheet_on.png") -82px -410px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -82px -492px;
+    background-size : 600% 900%;
 }
 
 #enemyKDR3_on {
-    background: url("../img/trophies/IconSheet_on.png") -164px -410px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -164px -492px;
+    background-size : 600% 900%;
 }
 
 /*Five-level trophies*/
-.trophy_fastkills .trophy_1, .trophy_fastkills .trophy_2, .trophy_fastkills .trophy_3, .trophy_fastkills .trophy_4, .trophy_fastkills .trophy_5 {
-  width:20%;
-  height: 96px;
-  text-align: center;
-  margin-top: 80px;
-  margin-bottom: 38px;
-}
-
-#fastkills1 {
-    background: url("../img/trophies/IconSheet.png") 0px -246px;
-    background-size : 600% 800%;
-}
-
-#fastkills2 {
-    background: url("../img/trophies/IconSheet.png") -82px -246px;
-    background-size : 600% 800%;
-}
-
-#fastkills3 {
-    background: url("../img/trophies/IconSheet.png") -164px -246px;
-    background-size : 600% 800%;
-}
-
-#fastkills4 {
-    background: url("../img/trophies/IconSheet.png") -246px -246px;
-    background-size : 600% 800%;
-}
-
-#fastkills5 {
-    background: url("../img/trophies/IconSheet.png") -328px -246px;
-    background-size : 600% 800%;
-}
-
-#fastkills1_on {
-    background: url("../img/trophies/IconSheet_on.png") 0px -246px;
-    background-size : 600% 800%;
-}
-
-#fastkills2_on {
-    background: url("../img/trophies/IconSheet_on.png") -82px -246px;
-    background-size : 600% 800%;
-}
-
-#fastkills3_on {
-    background: url("../img/trophies/IconSheet_on.png") -164px -246px;
-    background-size : 600% 800%;
-}
-
-#fastkills4_on {
-    background: url("../img/trophies/IconSheet_on.png") -246px -246px;
-    background-size : 600% 800%;
-}
-
-#fastkills5_on {
-    background: url("../img/trophies/IconSheet_on.png") -328px -246px;
-    background-size : 600% 800%;
-}
 
 /*Six-level trophies*/
 .trophy_killingspree .trophy_1, .trophy_killingspree .trophy_2, .trophy_killingspree .trophy_3, .trophy_killingspree .trophy_4, .trophy_killingspree .trophy_5, .trophy_killingspree .trophy_6 {
@@ -617,132 +574,201 @@ footer #serveron {
   margin-top: 60px;
   margin-bottom: 38px;
 }
+
 .trophy_TDMtotalkills .trophy_1, .trophy_TDMtotalkills .trophy_2, .trophy_TDMtotalkills .trophy_3, .trophy_TDMtotalkills .trophy_4, .trophy_TDMtotalkills .trophy_5, .trophy_TDMtotalkills .trophy_6 {
   width:18%;
   height: 96px;
   text-align: center;
-  margin-top: 60px;
+  margin-top: 80px;
   margin-bottom: 38px;
 }
 
+.trophy_fastkills .trophy_1, .trophy_fastkills .trophy_2, .trophy_fastkills .trophy_3, .trophy_fastkills .trophy_4, .trophy_fastkills .trophy_5, .trophy_fastkills .trophy_6 {
+  width:18%;
+  height: 96px;
+  text-align: center;
+  margin-top: 80px;
+  margin-bottom: 38px;
+}
+
+#fastkills1 {
+    background: url("../img/trophies/IconSheet1.png") 0px -328px;
+    background-size : 600% 900%;
+}
+
+#fastkills2 {
+    background: url("../img/trophies/IconSheet1.png") -82px -328px;
+    background-size : 600% 900%;
+}
+
+#fastkills3 {
+    background: url("../img/trophies/IconSheet1.png") -164px -328px;
+    background-size : 600% 900%;
+}
+
+#fastkills4 {
+    background: url("../img/trophies/IconSheet1.png") -246px -328px;
+    background-size : 600% 900%;
+}
+
+#fastkills5 {
+    background: url("../img/trophies/IconSheet1.png") -328px -328px;
+    background-size : 600% 900%;
+}
+
+#fastkills6 {
+    background: url("../img/trophies/IconSheet1.png") -410px -328px;
+    background-size : 600% 900%;
+}
+
+#fastkills1_on {
+    background: url("../img/trophies/IconSheet1_on.png") 0px -328px;
+    background-size : 600% 900%;
+}
+
+#fastkills2_on {
+    background: url("../img/trophies/IconSheet1_on.png") -82px -328px;
+    background-size : 600% 900%;
+}
+
+#fastkills3_on {
+    background: url("../img/trophies/IconSheet1_on.png") -164px -328px;
+    background-size : 600% 900%;
+}
+
+#fastkills4_on {
+    background: url("../img/trophies/IconSheet1_on.png") -246px -328px;
+    background-size : 600% 900%;
+}
+
+#fastkills5_on {
+    background: url("../img/trophies/IconSheet1_on.png") -328px -328px;
+    background-size : 600% 900%;
+}
+
+#fastkills6_on {
+    background: url("../img/trophies/IconSheet1_on.png") -410px -328px;
+    background-size : 600% 900%;
+}
+
 #killingspree1 {
-    background: url("../img/trophies/IconSheet.png") 0px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") 0px -246px;
+    background-size : 600% 900%;
 }
 
 #killingspree2 {
-    background: url("../img/trophies/IconSheet.png") -82px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -82px -246px;
+    background-size : 600% 900%;
 }
 
 #killingspree3 {
-    background: url("../img/trophies/IconSheet.png") -164px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -164px -246px;
+    background-size : 600% 900%;
 }
 
 #killingspree4 {
-    background: url("../img/trophies/IconSheet.png") -246px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -246px -246px;
+    background-size : 600% 900%;
 }
 
 #killingspree5 {
-    background: url("../img/trophies/IconSheet.png") -328px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -328px -246px;
+    background-size : 600% 900%;
 }
 
 #killingspree6 {
-    background: url("../img/trophies/IconSheet.png") -410px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -410px -246px;
+    background-size : 600% 900%;
 }
 
 #killingspree1_on {
-    background: url("../img/trophies/IconSheet_on.png") 0px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") 0px -246px;
+    background-size : 600% 900%;
 }
 
 #killingspree2_on {
-    background: url("../img/trophies/IconSheet_on.png") -82px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -82px -246px;
+    background-size : 600% 900%;
 }
 
 #killingspree3_on {
-    background: url("../img/trophies/IconSheet_on.png") -164px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -164px -246px;
+    background-size : 600% 900%;
 }
 
 #killingspree4_on {
-    background: url("../img/trophies/IconSheet_on.png") -246px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -246px -246px;
+    background-size : 600% 900%;
 }
 
 #killingspree5_on {
-    background: url("../img/trophies/IconSheet_on.png") -328px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -328px -246px;
+    background-size : 600% 900%;
 }
 
 #killingspree6_on {
-    background: url("../img/trophies/IconSheet_on.png") -410px -82px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -410px -246px;
+    background-size : 600% 900%;
 }
 
 #TDMtotalkills1 {
-    background: url("../img/trophies/IconSheet.png") 0px -164px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") 0px -164px;
+    background-size : 600% 900%;
 }
 
 #TDMtotalkills2 {
-    background: url("../img/trophies/IconSheet.png") -82px -164px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -82px -164px;
+    background-size : 600% 900%;
 }
 
 #TDMtotalkills3 {
-    background: url("../img/trophies/IconSheet.png") -164px -164px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -164px -164px;
+    background-size : 600% 900%;
 }
 
 #TDMtotalkills4 {
-    background: url("../img/trophies/IconSheet.png") -246px -164px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -246px -164px;
+    background-size : 600% 900%;
 }
 
 #TDMtotalkills5 {
-    background: url("../img/trophies/IconSheet.png") -328px -164px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -328px -164px;
+    background-size : 600% 900%;
 }
 
 #TDMtotalkills6 {
-    background: url("../img/trophies/IconSheet.png") -410px -164px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1.png") -410px -164px;
+    background-size : 600% 900%;
 }
 
 #TDMtotalkills1_on {
-    background: url("../img/trophies/IconSheet_on.png") 0px -164px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") 0px -164px;
+    background-size : 600% 900%;
 }
 
 #TDMtotalkills2_on {
-    background: url("../img/trophies/IconSheet_on.png") -82px -164px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -82px -164px;
+    background-size : 600% 900%;
 }
 
 #TDMtotalkills3_on {
-    background: url("../img/trophies/IconSheet_on.png") -164px -164px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -164px -164px;
+    background-size : 600% 900%;
 }
 
 #TDMtotalkills4_on {
-    background: url("../img/trophies/IconSheet_on.png") -246px -164px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -246px -164px;
+    background-size : 600% 900%;
 }
 
 #TDMtotalkills5_on {
-    background: url("../img/trophies/IconSheet_on.png") -328px -164px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -328px -164px;
+    background-size : 600% 900%;
 }
 
 #TDMtotalkills6_on {
-    background: url("../img/trophies/IconSheet_on.png") -410px -164px;
-    background-size : 600% 800%;
+    background: url("../img/trophies/IconSheet1_on.png") -410px -164px;
+    background-size : 600% 900%;
 }
 
 #achievements span {
@@ -764,7 +790,7 @@ footer #serveron {
 
 /*Six-level trophies span*/
 
-.trophy_killingspree span, .trophy_TDMtotalkills span {
+.trophy_killingspree span, .trophy_TDMtotalkills span, .trophy_fastkills span {
 padding-left: 25px !important;
 padding-right: 25px !important;
 }

@@ -300,7 +300,11 @@ angular.module('DSApp')
         $scope.hasAvatar = true;
         $scope.srank = playersFactory.getsrank("-Livjatan");
         $scope.rank = "17";
-        $scope.favweaps = ["Opticor","Bronco"];
+        $scope.favweaps = [
+          {'background': 'url("app/img/weapons/Primaries.png") -1045px -240px','background-size' : '1200% 900%','Name':'Opticor'},
+          {'background': 'url("app/img/weapons/Secondaries.png") -285px -80px','background-size' : '1200% 700%','Name':'Bronco'},
+          {'background': 'url("app/img/weapons/Melee.png") -95px -80px','background-size' : '1200% 1100%','Name':'Caustacyst'}
+        ];
       }
       if (i[0].Name == "Seiguro") {
         $scope.hasAvatar = false;

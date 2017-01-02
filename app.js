@@ -161,6 +161,7 @@ bot.on('ready', function () {
     MongoClient.connect(url, opts, function(err, db) {
       try {
         db.collection('ServerInfo').find({}).toArray(function(err, out) {
+          db.close();
           res.json(out);
         });
       } catch (e) {}
@@ -186,8 +187,10 @@ bot.on('ready', function () {
                     delete inp[i]["Name"];
                     dbpl.collection('players').update({ "Name":localname },{ $inc: inp[i] },{upsert: true});
                   }
+                  dbp.close();
                   getplayers(dbpl, function (out) {
                     dbpl.collection('players').remove();
+                    dbpl.close();
                     res.json(out);
                   })
                 });
@@ -195,6 +198,7 @@ bot.on('ready', function () {
             });
           }
         });
+        db.close();
       });
     });
   });
@@ -220,7 +224,6 @@ bot.on('ready', function () {
     PvPHost["Name"] = ServerName;
     serverquery = PvPHost;
     collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
-
     db.close();
   });
 
@@ -509,6 +512,7 @@ function CheckJoins() {
           var collection = db.collection("ServerInfo");
           serverquery = PvPHost;
           collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+          db.close();
         });
       }
       SendToChat('`['+date+']'+' '+e.player+' has joined.'+'`');
@@ -541,6 +545,7 @@ function CheckTeams() {
               var collection = db.collection("ServerInfo");
               serverquery = PvPHost;
               collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+              db.close();
             });
             SendToChat('`['+date+']'+' '+e.player+' is now on team Sun.`');
           } else if (e.team == '1') {
@@ -550,6 +555,7 @@ function CheckTeams() {
               var collection = db.collection("ServerInfo");
               serverquery = PvPHost;
               collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+              db.close();
             });
             SendToChat('`['+date+']'+' '+e.player+' is now on team Moon.`');
           }
@@ -562,6 +568,7 @@ function CheckTeams() {
             var collection = db.collection("ServerInfo");
             serverquery = PvPHost;
             collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+            db.close();
           });
           SendToChat('`['+date+']'+' '+e.player+' is now on team Sun.`');
         } else {
@@ -571,6 +578,7 @@ function CheckTeams() {
             var collection = db.collection("ServerInfo");
             serverquery = PvPHost;
             collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+            db.close();
           });
           SendToChat('`['+date+']'+' '+e.player+' is now on team Moon.`');
         }
@@ -755,15 +763,17 @@ function PushKillToDB(victim, killer, weapon) {
   MongoClient.connect(url, opts, function(err, db) {
     var collection = db.collection('players');
 
-    vquery = {"Deaths":1};
-    vquery[dbw] = 1;
-    vquery[dbk] = 1;
-    collection.update({ "Name":victim },{ $inc: vquery },{upsert: true});
+    try {
+      vquery = {"Deaths":1};
+      vquery[dbw] = 1;
+      vquery[dbk] = 1;
+      collection.update({ "Name":victim },{ $inc: vquery },{upsert: true});
 
-    kquery = {"Kills":1};
-    kquery[kww] = 1;
-    kquery[kov] = 1;
-    collection.update({ "Name":killer },{ $inc: kquery },{upsert: true});
+      kquery = {"Kills":1};
+      kquery[kww] = 1;
+      kquery[kov] = 1;
+      collection.update({ "Name":killer },{ $inc: kquery },{upsert: true});
+    } catch (e) {}
 
     db.close();
   });
@@ -774,118 +784,120 @@ function CheckAchievements(timestamp,victim,killer,weapon,damage,totaldamage) {
   MongoClient.connect(url, opts, function(err, db) {
     var collection = db.collection('players');
 
-  //OverkillTrophy
-  if (parseInt(totaldamage)-parseInt(damage) > 200) {
-    collection.update({ "Name":killer },{ $inc: {"hasTrophyOverkill1":1} },{upsert: true});
-  }
-  if (parseInt(totaldamage)-parseInt(damage) > 250) {
-    collection.update({ "Name":killer },{ $inc: {"hasTrophyOverkill2":1} },{upsert: true});
-  }
-  if (parseInt(totaldamage)-parseInt(damage) > 300) {
-    collection.update({ "Name":killer },{ $inc: {"hasTrophyOverkill3":1} },{upsert: true});
-  }
-
-  //SniperHeadshotTrophy
-  if (weapon == "Snipetron" && parseInt(totaldamage) > 250) {
-    collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
-  }
-  if (weapon == "Snipetron Vandal" && parseInt(totaldamage) > 230) {
-    collection.update({ "Name":killer },{ $inc: {"hasTrophyOverkill3":1} },{upsert: true});
-      if (!db[killer]["hasTrophySniperHS"]) {
-        db[killer]["hasTrophySniperHS"] = 0;
+    try {
+      //OverkillTrophy
+      if (parseInt(totaldamage)-parseInt(damage) > 200) {
+        collection.update({ "Name":killer },{ $inc: {"hasTrophyOverkill1":1} },{upsert: true});
       }
-      db[killer]["hasTrophySniperHS"] += 1;
-  }
-  if (weapon == "Rubico" && parseInt(totaldamage) > 250) {
-    collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
-  }
-  if (weapon == "Vectis" && parseInt(totaldamage) > 247) {
-    collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
-  }
-  if (weapon == "Vectis Prime" && parseInt(totaldamage) > 240) {
-    collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
-  }
-  if (weapon == "Lanka" && parseInt(totaldamage) > 260) {
-    collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
-  }
-
-  //OneshotTrophy
-  if (parseInt(totaldamage) > 310) {
-    collection.update({ "Name":killer },{ $inc: {"hasTrophyOneshot1":1} },{upsert: true});
-    if (!oneshots[killer] || oneshots[killer] == 0) {
-      oneshots[killer] = 1;
-    } else if (oneshots[killer] == 1) {
-      collection.update({ "Name":killer },{ $inc: {"hasTrophyOneshot2":1} },{upsert: true});
-      oneshots[killer] = 2;
-    } else if (oneshots[killer] >= 2) {
-      collection.update({ "Name":killer },{ $inc: {"hasTrophyOneshot3":1} },{upsert: true});
-      oneshots[killer] += 1;
-    }
-  } else {
-    if (oneshots[killer]) {
-      oneshots[killer] = 0;
-    }
-  }
-
-  //StaffKillTrophy
-  if (victim.indexOf("[DE]") > -1) {
-    collection.update({ "Name":killer },{ $inc: {"hasTrophyStaffKill":1} },{upsert: true});
-  }
-
-  //MutualKillTrophies
-  gamebuffer.forEach(function (e) {
-    if (e.victim == killer || e.killer == victim) {
-      if (e.timestamp-timestamp < 500 && e.timestamp-timestamp > -500) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophyMutualKill1":1} },{upsert: true});
+      if (parseInt(totaldamage)-parseInt(damage) > 250) {
+        collection.update({ "Name":killer },{ $inc: {"hasTrophyOverkill2":1} },{upsert: true});
       }
-    }
+      if (parseInt(totaldamage)-parseInt(damage) > 300) {
+        collection.update({ "Name":killer },{ $inc: {"hasTrophyOverkill3":1} },{upsert: true});
+      }
+
+      //SniperHeadshotTrophy
+      if (weapon == "Snipetron" && parseInt(totaldamage) > 250) {
+        collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+      }
+      if (weapon == "Snipetron Vandal" && parseInt(totaldamage) > 230) {
+        collection.update({ "Name":killer },{ $inc: {"hasTrophyOverkill3":1} },{upsert: true});
+          if (!db[killer]["hasTrophySniperHS"]) {
+            db[killer]["hasTrophySniperHS"] = 0;
+          }
+          db[killer]["hasTrophySniperHS"] += 1;
+      }
+      if (weapon == "Rubico" && parseInt(totaldamage) > 250) {
+        collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+      }
+      if (weapon == "Vectis" && parseInt(totaldamage) > 247) {
+        collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+      }
+      if (weapon == "Vectis Prime" && parseInt(totaldamage) > 240) {
+        collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+      }
+      if (weapon == "Lanka" && parseInt(totaldamage) > 260) {
+        collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+      }
+
+      //OneshotTrophy
+      if (parseInt(totaldamage) > 310) {
+        collection.update({ "Name":killer },{ $inc: {"hasTrophyOneshot1":1} },{upsert: true});
+        if (!oneshots[killer] || oneshots[killer] == 0) {
+          oneshots[killer] = 1;
+        } else if (oneshots[killer] == 1) {
+          collection.update({ "Name":killer },{ $inc: {"hasTrophyOneshot2":1} },{upsert: true});
+          oneshots[killer] = 2;
+        } else if (oneshots[killer] >= 2) {
+          collection.update({ "Name":killer },{ $inc: {"hasTrophyOneshot3":1} },{upsert: true});
+          oneshots[killer] += 1;
+        }
+      } else {
+        if (oneshots[killer]) {
+          oneshots[killer] = 0;
+        }
+      }
+
+      //StaffKillTrophy
+      if (victim.indexOf("[DE]") > -1) {
+        collection.update({ "Name":killer },{ $inc: {"hasTrophyStaffKill":1} },{upsert: true});
+      }
+
+      //MutualKillTrophies
+      gamebuffer.forEach(function (e) {
+        if (e.victim == killer || e.killer == victim) {
+          if (e.timestamp-timestamp < 500 && e.timestamp-timestamp > -500) {
+            collection.update({ "Name":killer },{ $inc: {"hasTrophyMutualKill1":1} },{upsert: true});
+          }
+        }
+      });
+
+      //RevengeTrophy
+      rev[victim] = killer;
+      if (rev[killer] == victim) {
+        collection.update({ "Name":killer },{ $inc: {"hasTrophyRevenge":1} },{upsert: true});
+      }
+
+      //KillingSpreeTrophies
+      killingspreemka = {};
+      gamebuffer.forEach(function (e) {
+        if (!killingspreemka[e.killer]) {
+          killingspreemka[e.killer] = 1;
+        } else {
+          killingspreemka[e.killer] += 1;
+        }
+      });
+      killingspreemk = Object.keys(killingspreemka).reduce(function(a, b){ return killingspreemka[a] > killingspreemka[b] ? a : b });
+      if (killingspree[victim]) {
+        killingspree[victim] = 0;
+      }
+      if (!killingspree[killer]) {
+        killingspree[killer] = 1;
+      } else {
+        killingspree[killer] += 1;
+        if (killingspree[killer] >= 5) {
+          collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree1":1} },{upsert: true});
+        }
+        if (killingspree[killer] >= 10) {
+          collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree2":1} },{upsert: true});
+        }
+        if (killingspree[killer] >= 15) {
+          collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree3":1} },{upsert: true});
+        }
+        if (killingspree[killer] >= 20) {
+          collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree4":1} },{upsert: true});
+        }
+        if (killingspree[killer] >= 25) {
+          collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree5":1} },{upsert: true});
+        }
+        if (killingspree[killer] >= 30) {
+          collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree6":1} },{upsert: true});
+        }
+      }
+    } catch (e) {}
+
+    db.close();
   });
-
-  //RevengeTrophy
-  rev[victim] = killer;
-  if (rev[killer] == victim) {
-    collection.update({ "Name":killer },{ $inc: {"hasTrophyRevenge":1} },{upsert: true});
-  }
-
-  //KillingSpreeTrophies
-  killingspreemka = {};
-  gamebuffer.forEach(function (e) {
-    if (!killingspreemka[e.killer]) {
-      killingspreemka[e.killer] = 1;
-    } else {
-      killingspreemka[e.killer] += 1;
-    }
-  });
-  killingspreemk = Object.keys(killingspreemka).reduce(function(a, b){ return killingspreemka[a] > killingspreemka[b] ? a : b });
-  if (killingspree[victim]) {
-    killingspree[victim] = 0;
-  }
-  if (!killingspree[killer]) {
-    killingspree[killer] = 1;
-  } else {
-    killingspree[killer] += 1;
-    if (killingspree[killer] >= 5) {
-      collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree1":1} },{upsert: true});
-    }
-    if (killingspree[killer] >= 10) {
-      collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree2":1} },{upsert: true});
-    }
-    if (killingspree[killer] >= 15) {
-      collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree3":1} },{upsert: true});
-    }
-    if (killingspree[killer] >= 20) {
-      collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree4":1} },{upsert: true});
-    }
-    if (killingspree[killer] >= 25) {
-      collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree5":1} },{upsert: true});
-    }
-    if (killingspree[killer] >= 30) {
-      collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree6":1} },{upsert: true});
-    }
-  }
-
-  db.close();
-});
 
 }
 
@@ -894,75 +906,83 @@ function EndOfGameAchievements() {
   MongoClient.connect(url, opts, function(err, db) {
     var collection = db.collection('players');
 
-  //TotalKillTrophies
-  totalkill = {};
-  gamebuffer.forEach(function (e) {
-    if (!totalkill[e.killer]) {
-      totalkill[e.killer] = 1;
-    }  else {
-      totalkill[e.killer]++;
-    }
-  });
-  Object.keys(totalkill).map(function(objectKey, index) {
-    if (PvPHost["gameMode"] == "Annihilation") {
-      if (totalkill[objectKey] >= 10) {
-        collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTotalKill1":1} },{upsert: true});
-      }
-      if (totalkill[objectKey] >= 15) {
-        collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTotalKill2":1} },{upsert: true});
-      }
-      if (totalkill[objectKey] >= 25) {
-        collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTotalKill3":1} },{upsert: true});
-      }
-    } else if (PvPHost["gameMode"] == "Team Annihilation") {
-      if (totalkill[objectKey] >= 10) {
-        collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill1":1} },{upsert: true});
-      }
-      if (totalkill[objectKey] >= 20) {
-        collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill2":1} },{upsert: true});
-      }
-      if (totalkill[objectKey] >= 30) {
-        collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill3":1} },{upsert: true});
-      }
-      if (totalkill[objectKey] >= 40) {
-        collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill4":1} },{upsert: true});
-      }
-      if (totalkill[objectKey] >= 45) {
-        collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill5":1} },{upsert: true});
-      }
-      if (totalkill[objectKey] >= 50) {
-        collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill6":1} },{upsert: true});
-      }
-    }
-  });
+    try {
+      //TotalKillTrophies
+      totalkill = {};
+      gamebuffer.forEach(function (e) {
+        if (!totalkill[e.killer]) {
+          totalkill[e.killer] = 1;
+        }  else {
+          totalkill[e.killer]++;
+        }
+      });
+      Object.keys(totalkill).map(function(objectKey, index) {
+        if (PvPHost["gameMode"] == "Annihilation") {
+          if (totalkill[objectKey] >= 10) {
+            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTotalKill1":1} },{upsert: true});
+          }
+          if (totalkill[objectKey] >= 15) {
+            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTotalKill2":1} },{upsert: true});
+          }
+          if (totalkill[objectKey] >= 25) {
+            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTotalKill3":1} },{upsert: true});
+          }
+        } else if (PvPHost["gameMode"] == "Team Annihilation") {
+          if (totalkill[objectKey] >= 10) {
+            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill1":1} },{upsert: true});
+          }
+          if (totalkill[objectKey] >= 20) {
+            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill2":1} },{upsert: true});
+          }
+          if (totalkill[objectKey] >= 30) {
+            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill3":1} },{upsert: true});
+          }
+          if (totalkill[objectKey] >= 40) {
+            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill4":1} },{upsert: true});
+          }
+          if (totalkill[objectKey] >= 45) {
+            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill5":1} },{upsert: true});
+          }
+          if (totalkill[objectKey] >= 50) {
+            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill6":1} },{upsert: true});
+          }
+        }
+      });
 
-  //FastKillTrophies
-  fastkill = {};
-  gamebuffer.forEach(function (e) {
-    if (!fastkill[e.killer]) {
-      fastkill[e.killer] = [];
-      fastkill[e.killer].push(e.timestamp);
-    } else {
-      fastkill[e.killer].push(e.timestamp);
-    }
-  });
-  Object.keys(fastkill).map(function(objectKey, index) {
-    for (var i = 0; i < fastkill[objectKey].length; i++) {
-      if (fastkill[objectKey][i+1]) {
-        if ((fastkill[objectKey][i]-fastkill[objectKey][i+1]) > -5000 && (fastkill[objectKey][i]-fastkill[objectKey][i+1]) < 5000) {
-          collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill1":1} },{upsert: true});
-          if (fastkill[objectKey][i+2]) {
-            if ((fastkill[objectKey][i+1]-fastkill[objectKey][i+2]) > -5000 && (fastkill[objectKey][i+1]-fastkill[objectKey][i+2]) < 5000) {
-              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill2":1} },{upsert: true});
-              if (fastkill[objectKey][i+3]) {
-                if ((fastkill[objectKey][i+2]-fastkill[objectKey][i+3]) > -5000 && (fastkill[objectKey][i+2]-fastkill[objectKey][i+3]) < 5000) {
-                  collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill3":1} },{upsert: true});
-                  if (fastkill[objectKey][i+4]) {
-                    if ((fastkill[objectKey][i+3]-fastkill[objectKey][i+4]) > -5000 && (fastkill[objectKey][i+3]-fastkill[objectKey][i+4]) < 5000) {
-                      collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill4":1} },{upsert: true});
-                      if (fastkill[objectKey][i+5]) {
-                        if ((fastkill[objectKey][i+4]-fastkill[objectKey][i+5]) > -5000 && (fastkill[objectKey][i+4]-fastkill[objectKey][i+5]) < 5000) {
-                          collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill5":1} },{upsert: true});
+      //FastKillTrophies
+      fastkill = {};
+      gamebuffer.forEach(function (e) {
+        if (!fastkill[e.killer]) {
+          fastkill[e.killer] = [];
+          fastkill[e.killer].push(e.timestamp);
+        } else {
+          fastkill[e.killer].push(e.timestamp);
+        }
+      });
+      Object.keys(fastkill).map(function(objectKey, index) {
+        for (var i = 0; i < fastkill[objectKey].length; i++) {
+          if (fastkill[objectKey][i+1]) {
+            if ((fastkill[objectKey][i]-fastkill[objectKey][i+1]) > -5000 && (fastkill[objectKey][i]-fastkill[objectKey][i+1]) < 5000) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill1":1} },{upsert: true});
+              if (fastkill[objectKey][i+2]) {
+                if ((fastkill[objectKey][i+1]-fastkill[objectKey][i+2]) > -5000 && (fastkill[objectKey][i+1]-fastkill[objectKey][i+2]) < 5000) {
+                  collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill2":1} },{upsert: true});
+                  if (fastkill[objectKey][i+3]) {
+                    if ((fastkill[objectKey][i+2]-fastkill[objectKey][i+3]) > -5000 && (fastkill[objectKey][i+2]-fastkill[objectKey][i+3]) < 5000) {
+                      collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill3":1} },{upsert: true});
+                      if (fastkill[objectKey][i+4]) {
+                        if ((fastkill[objectKey][i+3]-fastkill[objectKey][i+4]) > -5000 && (fastkill[objectKey][i+3]-fastkill[objectKey][i+4]) < 5000) {
+                          collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill4":1} },{upsert: true});
+                          if (fastkill[objectKey][i+5]) {
+                            if ((fastkill[objectKey][i+4]-fastkill[objectKey][i+5]) > -5000 && (fastkill[objectKey][i+4]-fastkill[objectKey][i+5]) < 5000) {
+                              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill5":1} },{upsert: true});
+                              if (fastkill[objectKey][i+6]) {
+                                if ((fastkill[objectKey][i+5]-fastkill[objectKey][i+6]) > -5000 && (fastkill[objectKey][i+5]-fastkill[objectKey][i+6]) < 5000) {
+                                  collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill6":1} },{upsert: true});
+                                }
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -972,247 +992,480 @@ function EndOfGameAchievements() {
             }
           }
         }
-      }
-    }
-  });
+      });
 
-  //EnemyKDRTrophies
-  enemykdr = {};
-  gamebuffer.forEach(function (e) {
-    if (!enemykdr[e.killer]) {
-      enemykdr[e.killer] = {};
-      enemykdr[e.killer][e.victim] = 1;
-    } else {
-      if (enemykdr[e.killer][e.victim]) {
-        enemykdr[e.killer][e.victim] += 1;
-      } else {
-        enemykdr[e.killer][e.victim] = 1;
-      }
-    }
-  });
-  Object.keys(enemykdr).map(function(objectKey, index) {
-      vkdr1 = [];
-      vkdr2 = [];
-      vkdr3 = [];
-      kdrtk = 0;
-      Object.keys(enemykdr[objectKey]).map(function(objv, index) {
-        kdrtk += enemykdr[objectKey][objv];
-        console.log(kdrtk);
-        if (db[objv]["Kills"]) {
-          keykdr = (parseInt(db[objv]["Kills"]) / parseInt(db[objv]["Deaths"]));
+      //EnemyKDRTrophies
+      enemykdr = {};
+      gamebuffer.forEach(function (e) {
+        if (!enemykdr[e.killer]) {
+          enemykdr[e.killer] = {};
+          enemykdr[e.killer][e.victim] = 1;
         } else {
-          keykdr = (0.5 / parseInt(db[objv]["Deaths"]));
-        }
-        for (var i = 0; i < enemykdr[objectKey][objv]; i++) {
-          console.log(objv+" has been killed "+enemykdr[objectKey][objv]+"times.");
-          if (keykdr <= 2) {
-            vkdr1.push(keykdr);
-          } else if (keykdr > 2) {
-            vkdr2.push(keykdr);
-          } else if (keykdr > 3) {
-            vkdr3.push(keykdr);
+          if (enemykdr[e.killer][e.victim]) {
+            enemykdr[e.killer][e.victim] += 1;
+          } else {
+            enemykdr[e.killer][e.victim] = 1;
           }
         }
       });
-      console.log(vkdr1);
-      console.log(vkdr2);
-      console.log(vkdr3);
-      if (kdrtk > 10) {
-        if (vkdr1.length > vkdr2.length) {
-          if (vkdr1.length > vkdr3.length) {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyEnemyKDR1":1} },{upsert: true});
-          }
-        }
-        if (vkdr2.length > vkdr1.length) {
-          if (vkdr2.length > vkdr3.length) {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyEnemyKDR2":1} },{upsert: true});
-          }
-        }
-        if (vkdr3.length > vkdr1.length) {
-          if (vkdr3.length > vkdr2.length) {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyEnemyKDR3":1} },{upsert: true});
-          }
-        }
-      }
-  });
-
-  //RespawnKillTrophies
-  respawnk = {};
-  gamebuffer.forEach(function (e) {
-    if (!respawnk[e.victim]) {
-      respawnk[e.victim] = [];
-    }
-    respawnk[e.victim].push(e.timestamp);
-    respawnk[e.victim].push(e.killer);
-  });
-  Object.keys(respawnk).map(function(objectKey, index) {
-    gamebuffer.forEach(function (e) {
-      if (respawnk[objectKey] == e.killer && (respawnk[objectKey][0] - e.timestamp) < 8500) {
-        collection.update({ "Name":objectKey },{ $inc: {"hasTrophyRespawnKill1":1} },{upsert: true});
-        if (respawnk[objectKey][1] == e.victim) {
-          collection.update({ "Name":objectKey },{ $inc: {"hasTrophyRespawnKill2":1} },{upsert: true});
-        }
-      }
-    });
-  });
-
-  //PunchthroughTrophies
-  punchthrough = {};
-  gamebuffer.forEach(function (e) {
-    if (!punchthrough[e.killer]) {
-      punchthrough[e.killer] = [];
-      punchthrough[e.killer].push(e.timestamp,e.weapon);
-    } else {
-      punchthrough[e.killer].push(e.timestamp,e.weapon);
-    }
-  });
-  Object.keys(punchthrough).map(function(objectKey, index) {
-    for (var i = 0; i < punchthrough[objectKey].length; i++) {
-      if (punchthrough[objectKey][i+2]) {
-        if ((punchthrough[objectKey][i]-punchthrough[objectKey][i+2]) > -100 && (punchthrough[objectKey][i]-punchthrough[objectKey][i+2]) < 100 && (punchthrough[objectKey][i+1] == punchthrough[objectKey][i+3])) {
-          if (punchthrough[objectKey][i+1] == "Snipetron Vandal" || punchthrough[objectKey][i+1] == "Snipetron" || punchthrough[objectKey][i+1] == "Kohmak" || punchthrough[objectKey][i+1] == "Twin Kohmak" || punchthrough[objectKey][i+1] == "Lanka" || punchthrough[objectKey][i+1] == "Drakgoon" || punchthrough[objectKey][i+1] == "Embolist") {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyPunchthrough1":1} },{upsert: true});
-            if (punchthrough[objectKey][i+4]) {
-              if ((punchthrough[objectKey][i+2]-punchthrough[objectKey][i+4]) > -100 && (punchthrough[objectKey][i+2]-punchthrough[objectKey][i+4]) < 100 && (punchthrough[objectKey][i+3] == punchthrough[objectKey][i+5])) {
-                if (punchthrough[objectKey][i+3] == "Snipetron Vandal" || punchthrough[objectKey][i+3] == "Snipetron" || punchthrough[objectKey][i+3] == "Kohmak" || punchthrough[objectKey][i+3] == "Twin Kohmak" || punchthrough[objectKey][i+3] == "Lanka" || punchthrough[objectKey][i+3] == "Daikyu" || punchthrough[objectKey][i+3] == "Paris" || punchthrough[objectKey][i+3] == "Paris Prime" || punchthrough[objectKey][i+3] == "Cernos" || punchthrough[objectKey][i+3] == "Rakta Cernos" || punchthrough[objectKey][i+3] == "Dread" || punchthrough[objectKey][i+3] == "Drakgoon" || punchthrough[objectKey][i+3] == "Embolist") {
-                  collection.update({ "Name":objectKey },{ $inc: {"hasTrophyPunchthrough2":1} },{upsert: true});
-                }
+      Object.keys(enemykdr).map(function(objectKey, index) {
+          vkdr1 = [];
+          vkdr2 = [];
+          vkdr3 = [];
+          kdrtk = 0;
+          Object.keys(enemykdr[objectKey]).map(function(objv, index) {
+            kdrtk += enemykdr[objectKey][objv];
+            if (db[objv]["Kills"]) {
+              keykdr = (parseInt(db[objv]["Kills"]) / parseInt(db[objv]["Deaths"]));
+            } else {
+              keykdr = (0.5 / parseInt(db[objv]["Deaths"]));
+            }
+            for (var i = 0; i < enemykdr[objectKey][objv]; i++) {
+              if (keykdr <= 2) {
+                vkdr1.push(keykdr);
+              } else if (keykdr > 2) {
+                vkdr2.push(keykdr);
+              } else if (keykdr > 3) {
+                vkdr3.push(keykdr);
               }
             }
-          } else if (punchthrough[objectKey][i+1] == "Miter" || punchthrough[objectKey][i+1] == "Penta" || punchthrough[objectKey][i+1] == "Seer" || punchthrough[objectKey][i+1] == "Tonkor" || punchthrough[objectKey][i+1] == "Secura Penta" || punchthrough[objectKey][i+1] == "Zarr" || punchthrough[objectKey][i+1] == "Angstrum" || punchthrough[objectKey][i+1] == "Castanas" || punchthrough[objectKey][i+1] == "Sancti Castanas" || punchthrough[objectKey][i+1] == "Kulstar" || punchthrough[objectKey][i+1] == "Sonicor" || punchthrough[objectKey][i+1] == "Staticor") {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyExplosion1":1} },{upsert: true});
-            if (punchthrough[objectKey][i+4]) {
-              if ((punchthrough[objectKey][i+2]-punchthrough[objectKey][i+4]) > -100 && (punchthrough[objectKey][i+2]-punchthrough[objectKey][i+4]) < 100 && (punchthrough[objectKey][i+3] == punchthrough[objectKey][i+5])) {
-                if (punchthrough[objectKey][i+3] == "Miter" || punchthrough[objectKey][i+3] == "Penta" || punchthrough[objectKey][i+3] == "Seer" || punchthrough[objectKey][i+3] == "Tonkor" || punchthrough[objectKey][i+3] == "Secura Penta" || punchthrough[objectKey][i+3] == "Zarr" || punchthrough[objectKey][i+3] == "Angstrum" || punchthrough[objectKey][i+3] == "Castanas" || punchthrough[objectKey][i+3] == "Sancti Castanas" || punchthrough[objectKey][i+3] == "Kulstar" || punchthrough[objectKey][i+3] == "Sonicor" || punchthrough[objectKey][i+3] == "Staticor") {
-                  collection.update({ "Name":objectKey },{ $inc: {"hasTrophyExplosion2":1} },{upsert: true});
-                }
+          });
+          if (kdrtk > 10) {
+            if (vkdr1.length > vkdr2.length) {
+              if (vkdr1.length > vkdr3.length) {
+                collection.update({ "Name":objectKey },{ $inc: {"hasTrophyEnemyKDR1":1} },{upsert: true});
               }
             }
-          } else if (punchthrough[objectKey][i+1] == "Daikyu" || punchthrough[objectKey][i+1] == "Paris" || punchthrough[objectKey][i+1] == "Paris Prime" || punchthrough[objectKey][i+1] == "Cernos" || punchthrough[objectKey][i+1] == "Rakta Cernos" || punchthrough[objectKey][i+1] == "Dread") {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyPunchthrough1":1, "hasTrophyBowSpecial":1} },{upsert: true});
-            if (punchthrough[objectKey][i+4]) {
-              if ((punchthrough[objectKey][i+2]-punchthrough[objectKey][i+4]) > -100 && (punchthrough[objectKey][i+2]-punchthrough[objectKey][i+4]) < 100 && (punchthrough[objectKey][i+3] == punchthrough[objectKey][i+5])) {
-                if (punchthrough[objectKey][i+1] == "Daikyu" || punchthrough[objectKey][i+1] == "Paris" || punchthrough[objectKey][i+1] == "Paris Prime" || punchthrough[objectKey][i+1] == "Cernos" || punchthrough[objectKey][i+1] == "Rakta Cernos" || punchthrough[objectKey][i+1] == "Dread") {
-                  collection.update({ "Name":objectKey },{ $inc: {"hasTrophyPunchthrough2":1} },{upsert: true});
-                }
+            if (vkdr2.length > vkdr1.length) {
+              if (vkdr2.length > vkdr3.length) {
+                collection.update({ "Name":objectKey },{ $inc: {"hasTrophyEnemyKDR2":1} },{upsert: true});
+              }
+            }
+            if (vkdr3.length > vkdr1.length) {
+              if (vkdr3.length > vkdr2.length) {
+                collection.update({ "Name":objectKey },{ $inc: {"hasTrophyEnemyKDR3":1} },{upsert: true});
               }
             }
           }
-        }
-      }
-    }
-  });
+      });
 
-  db.close();
-});
+      //RespawnKillTrophies
+      respawnk = {};
+      gamebuffer.forEach(function (e) {
+        if (!respawnk[e.victim]) {
+          respawnk[e.victim] = [];
+        }
+        respawnk[e.victim].push(e.timestamp);
+        respawnk[e.victim].push(e.killer);
+      });
+      Object.keys(respawnk).map(function(objectKey, index) {
+        gamebuffer.forEach(function (e) {
+          if (respawnk[objectKey] == e.killer && (respawnk[objectKey][0] - e.timestamp) < 8500) {
+            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyRespawnKill1":1} },{upsert: true});
+            if (respawnk[objectKey][1] == e.victim) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyRespawnKill2":1} },{upsert: true});
+            }
+          }
+        });
+      });
+
+      //PunchthroughTrophies
+      punchthrough = {};
+      gamebuffer.forEach(function (e) {
+        if (!punchthrough[e.killer]) {
+          punchthrough[e.killer] = [];
+          punchthrough[e.killer].push(e.timestamp,e.weapon);
+        } else {
+          punchthrough[e.killer].push(e.timestamp,e.weapon);
+        }
+      });
+      Object.keys(punchthrough).map(function(objectKey, index) {
+        for (var i = 0; i < punchthrough[objectKey].length; i++) {
+          if (punchthrough[objectKey][i+2]) {
+            if ((punchthrough[objectKey][i]-punchthrough[objectKey][i+2]) > -100 && (punchthrough[objectKey][i]-punchthrough[objectKey][i+2]) < 100 && (punchthrough[objectKey][i+1] == punchthrough[objectKey][i+3])) {
+              if (punchthrough[objectKey][i+1] == "Snipetron Vandal" || punchthrough[objectKey][i+1] == "Snipetron" || punchthrough[objectKey][i+1] == "Kohmak" || punchthrough[objectKey][i+1] == "Twin Kohmak" || punchthrough[objectKey][i+1] == "Lanka" || punchthrough[objectKey][i+1] == "Drakgoon" || punchthrough[objectKey][i+1] == "Embolist") {
+                collection.update({ "Name":objectKey },{ $inc: {"hasTrophyPunchthrough1":1} },{upsert: true});
+                if (punchthrough[objectKey][i+4]) {
+                  if ((punchthrough[objectKey][i+2]-punchthrough[objectKey][i+4]) > -100 && (punchthrough[objectKey][i+2]-punchthrough[objectKey][i+4]) < 100 && (punchthrough[objectKey][i+3] == punchthrough[objectKey][i+5])) {
+                    if (punchthrough[objectKey][i+3] == "Snipetron Vandal" || punchthrough[objectKey][i+3] == "Snipetron" || punchthrough[objectKey][i+3] == "Kohmak" || punchthrough[objectKey][i+3] == "Twin Kohmak" || punchthrough[objectKey][i+3] == "Lanka" || punchthrough[objectKey][i+3] == "Daikyu" || punchthrough[objectKey][i+3] == "Paris" || punchthrough[objectKey][i+3] == "Paris Prime" || punchthrough[objectKey][i+3] == "Cernos" || punchthrough[objectKey][i+3] == "Rakta Cernos" || punchthrough[objectKey][i+3] == "Dread" || punchthrough[objectKey][i+3] == "Drakgoon" || punchthrough[objectKey][i+3] == "Embolist") {
+                      collection.update({ "Name":objectKey },{ $inc: {"hasTrophyPunchthrough2":1} },{upsert: true});
+                    }
+                  }
+                }
+              } else if (punchthrough[objectKey][i+1] == "Miter" || punchthrough[objectKey][i+1] == "Penta" || punchthrough[objectKey][i+1] == "Seer" || punchthrough[objectKey][i+1] == "Tonkor" || punchthrough[objectKey][i+1] == "Secura Penta" || punchthrough[objectKey][i+1] == "Zarr" || punchthrough[objectKey][i+1] == "Angstrum" || punchthrough[objectKey][i+1] == "Castanas" || punchthrough[objectKey][i+1] == "Sancti Castanas" || punchthrough[objectKey][i+1] == "Kulstar" || punchthrough[objectKey][i+1] == "Sonicor" || punchthrough[objectKey][i+1] == "Staticor") {
+                collection.update({ "Name":objectKey },{ $inc: {"hasTrophyExplosion1":1} },{upsert: true});
+                if (punchthrough[objectKey][i+4]) {
+                  if ((punchthrough[objectKey][i+2]-punchthrough[objectKey][i+4]) > -100 && (punchthrough[objectKey][i+2]-punchthrough[objectKey][i+4]) < 100 && (punchthrough[objectKey][i+3] == punchthrough[objectKey][i+5])) {
+                    if (punchthrough[objectKey][i+3] == "Miter" || punchthrough[objectKey][i+3] == "Penta" || punchthrough[objectKey][i+3] == "Seer" || punchthrough[objectKey][i+3] == "Tonkor" || punchthrough[objectKey][i+3] == "Secura Penta" || punchthrough[objectKey][i+3] == "Zarr" || punchthrough[objectKey][i+3] == "Angstrum" || punchthrough[objectKey][i+3] == "Castanas" || punchthrough[objectKey][i+3] == "Sancti Castanas" || punchthrough[objectKey][i+3] == "Kulstar" || punchthrough[objectKey][i+3] == "Sonicor" || punchthrough[objectKey][i+3] == "Staticor") {
+                      collection.update({ "Name":objectKey },{ $inc: {"hasTrophyExplosion2":1} },{upsert: true});
+                    }
+                  }
+                }
+              } else if (punchthrough[objectKey][i+1] == "Daikyu" || punchthrough[objectKey][i+1] == "Paris" || punchthrough[objectKey][i+1] == "Paris Prime" || punchthrough[objectKey][i+1] == "Cernos" || punchthrough[objectKey][i+1] == "Rakta Cernos" || punchthrough[objectKey][i+1] == "Dread") {
+                collection.update({ "Name":objectKey },{ $inc: {"hasTrophyPunchthrough1":1, "hasTrophyBowSpecial":1} },{upsert: true});
+                if (punchthrough[objectKey][i+4]) {
+                  if ((punchthrough[objectKey][i+2]-punchthrough[objectKey][i+4]) > -100 && (punchthrough[objectKey][i+2]-punchthrough[objectKey][i+4]) < 100 && (punchthrough[objectKey][i+3] == punchthrough[objectKey][i+5])) {
+                    if (punchthrough[objectKey][i+1] == "Daikyu" || punchthrough[objectKey][i+1] == "Paris" || punchthrough[objectKey][i+1] == "Paris Prime" || punchthrough[objectKey][i+1] == "Cernos" || punchthrough[objectKey][i+1] == "Rakta Cernos" || punchthrough[objectKey][i+1] == "Dread") {
+                      collection.update({ "Name":objectKey },{ $inc: {"hasTrophyPunchthrough2":1} },{upsert: true});
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      });
+
+      //WarframeAnyTrophies
+      ashkills = {};
+      atlaskills = {};
+      emberkills = {};
+      excaliburkills = {};
+      frostkills = {};
+      hydroidkills = {};
+      miragekills = {};
+      rhinokills = {};
+      vaubankills = {};
+      zephyrkills = {};
+      valkyrkills = {};
+      trinitykills = {};
+
+      gamebuffer.forEach(function (e) {
+        if (e.weapon.indexOf("Ash")>-1) {
+          if (!ashkills[e.killer]) {
+            ashkills[e.killer] = [];
+            ashkills[e.killer].push(e.timestamp);
+          } else {
+            ashkills[e.killer].push(e.timestamp);
+          }
+        } else if (e.weapon.indexOf("Atlas")>-1) {
+          if (!atlaskills[e.killer]) {
+            atlaskills[e.killer] = [];
+            atlaskills[e.killer].push(e.timestamp);
+          } else {
+            atlaskills[e.killer].push(e.timestamp);
+          }
+        } else if (e.weapon.indexOf("Ember")>-1) {
+          if (!emberkills[e.killer]) {
+            emberkills[e.killer] = [];
+            emberkills[e.killer].push(e.timestamp);
+          } else {
+            emberkills[e.killer].push(e.timestamp);
+          }
+        } else if (e.weapon.indexOf("Excalibur")>-1) {
+          if (!excaliburkills[e.killer]) {
+            excaliburkills[e.killer] = [];
+            excaliburkills[e.killer].push(e.timestamp);
+          } else {
+            excaliburkills[e.killer].push(e.timestamp);
+          }
+        } else if (e.weapon.indexOf("Frost")>-1) {
+          if (!frostkills[e.killer]) {
+            frostkills[e.killer] = [];
+            frostkills[e.killer].push(e.timestamp);
+          } else {
+            frostkills[e.killer].push(e.timestamp);
+          }
+        } else if (e.weapon.indexOf("Hydroid")>-1) {
+          if (!hydroidkills[e.killer]) {
+            hydroidkills[e.killer] = [];
+            hydroidkills[e.killer].push(e.timestamp);
+          } else {
+            hydroidkills[e.killer].push(e.timestamp);
+          }
+        } else if (e.weapon.indexOf("Mirage")>-1 && e.totaldamage <48) {
+          if (!miragekills[e.killer]) {
+            miragekills[e.killer] = [];
+            miragekills[e.killer].push(e.timestamp);
+          } else {
+            miragekills[e.killer].push(e.timestamp);
+          }
+        } else if (e.weapon.indexOf("Rhino")>-1) {
+          if (!rhinokills[e.killer]) {
+            rhinokills[e.killer] = [];
+            rhinokills[e.killer].push(e.timestamp);
+          } else {
+            rhinokills[e.killer].push(e.timestamp);
+          }
+        } else if (true) {
+          if (!vaubankills[e.killer]) {
+            vaubankills[e.killer] = [];
+            vaubankills[e.killer].push(e.timestamp,e.weapon);
+          } else {
+            vaubankills[e.killer].push(e.timestamp,e.weapon);
+          }
+        } else if (e.weapon.indexOf("Zephyr")>-1) {
+          if (!zephyrkills[e.killer]) {
+            zephyrkills[e.killer] = [];
+            zephyrkills[e.killer].push(e.timestamp);
+          } else {
+            zephyrkills[e.killer].push(e.timestamp);
+          }
+        } else if (e.weapon.indexOf("Valkyr")>-1 && e.totaldamage > 300) {
+          if (!valkyrkills[e.killer]) {
+            valkyrkills[e.killer] = [];
+            valkyrkills[e.killer].push(e.timestamp);
+          } else {
+            valkyrkills[e.killer].push(e.timestamp);
+          }
+        } else if (e.weapon.indexOf("Trinity")>-1) {
+          if (!trinitykills[e.killer]) {
+            trinitykills[e.killer] = [];
+            trinitykills[e.killer].push(e.timestamp);
+          } else {
+            trinitykills[e.killer].push(e.timestamp);
+          }
+        }
+      });
+
+      //Ash
+      Object.keys(ashkills).map(function(objectKey, index) {
+        for (var i = 0; i < ashkills[objectKey].length; i++) {
+          if (ashkills[objectKey][i+1]) {
+            if ((ashkills[objectKey][i]-ashkills[objectKey][i+1]) > -3000 && (ashkills[objectKey][i]-ashkills[objectKey][i+1]) < 3000) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyAshkill":1} },{upsert: true});
+            }
+          }
+        }
+      });
+
+      //Atlas
+      Object.keys(atlaskills).map(function(objectKey, index) {
+        for (var i = 0; i < atlaskills[objectKey].length; i++) {
+          if (atlaskills[objectKey][i+1]) {
+            if ((atlaskills[objectKey][i]-atlaskills[objectKey][i+1]) > -10000 && (atlaskills[objectKey][i]-atlaskills[objectKey][i+1]) < 10000) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyAtlaskill":1} },{upsert: true});
+            }
+          }
+        }
+      });
+
+      //Ember
+      Object.keys(emberkills).map(function(objectKey, index) {
+        for (var i = 0; i < emberkills[objectKey].length; i++) {
+          if (emberkills[objectKey][i+1]) {
+            if ((emberkills[objectKey][i]-emberkills[objectKey][i+1]) > -10000 && (emberkills[objectKey][i]-emberkills[objectKey][i+1]) < 10000) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyEmberkill":1} },{upsert: true});
+            }
+          }
+        }
+      });
+
+      //Excalibur
+      Object.keys(excaliburkills).map(function(objectKey, index) {
+        for (var i = 0; i < excaliburkills[objectKey].length; i++) {
+          if (excaliburkills[objectKey][i+1] && excaliburkills[objectKey][i+2]) {
+            if ((excaliburkills[objectKey][i]-excaliburkills[objectKey][i+1]) > -10000 && (excaliburkills[objectKey][i]-excaliburkills[objectKey][i+1]) < 10000 && (excaliburkills[objectKey][i]-excaliburkills[objectKey][i+2]) > -10000 && (excaliburkills[objectKey][i]-excaliburkills[objectKey][i+2]) < 10000) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyExcaliburkill":1} },{upsert: true});
+            }
+          }
+        }
+      });
+
+      //Frost
+      Object.keys(frostkills).map(function(objectKey, index) {
+        for (var i = 0; i < frostkills[objectKey].length; i++) {
+          if (frostkills[objectKey][i+1]) {
+            if ((frostkills[objectKey][i]-frostkills[objectKey][i+1]) > -500 && (frostkills[objectKey][i]-frostkills[objectKey][i+1]) < 500) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFrostkill":1} },{upsert: true});
+            }
+          }
+        }
+      });
+
+      //Hydroid
+      Object.keys(hydroidkills).map(function(objectKey, index) {
+        for (var i = 0; i < hydroidkills[objectKey].length; i++) {
+          if (hydroidkills[objectKey][i+1]) {
+            if ((hydroidkills[objectKey][i]-hydroidkills[objectKey][i+1]) > -1000 && (hydroidkills[objectKey][i]-hydroidkills[objectKey][i+1]) < 1000) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyHydroidkill":1} },{upsert: true});
+            }
+          }
+        }
+      });
+
+      //Mirage
+      Object.keys(miragekills).map(function(objectKey, index) {
+        for (var i = 0; i < miragekills[objectKey].length; i++) {
+          if (miragekills[objectKey][i+1] && miragekills[objectKey][i+2]) {
+            if ((miragekills[objectKey][i]-miragekills[objectKey][i+1]) > -10000 && (miragekills[objectKey][i]-miragekills[objectKey][i+1]) < 10000 && (miragekills[objectKey][i]-miragekills[objectKey][i+2]) > -10000 && (miragekills[objectKey][i]-miragekills[objectKey][i+2]) < 10000) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyMiragekill":1} },{upsert: true});
+            }
+          }
+        }
+      });
+
+      //Rhino
+      Object.keys(rhinokills).map(function(objectKey, index) {
+        for (var i = 0; i < rhinokills[objectKey].length; i++) {
+          if (rhinokills[objectKey][i+1]) {
+            if ((rhinokills[objectKey][i]-rhinokills[objectKey][i+1]) > -500 && (rhinokills[objectKey][i]-rhinokills[objectKey][i+1]) < 500) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyRhinokill":1} },{upsert: true});
+            }
+          }
+        }
+      });
+
+      //Vauban
+      Object.keys(vaubankills).map(function(objectKey, index) {
+        for (var i = 0; i < vaubankills[objectKey].length; i++) {
+          if (vaubankills[objectKey][i+2]) {
+            if (((vaubankills[objectKey][i]-vaubankills[objectKey][i+2]) > -5000 && (vaubankills[objectKey][i]-vaubankills[objectKey][i+2]) < 0 && vaubankills[objectKey][i+3].indexOf("Vauban")>-1) || ((vaubankills[objectKey][i]-vaubankills[objectKey][i+2]) > 0 && (vaubankills[objectKey][i]-vaubankills[objectKey][i+2]) < 5000 && vaubankills[objectKey][i+1].indexOf("Vauban")>-1)) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyVaubankill":1} },{upsert: true});
+            }
+          }
+        }
+      });
+
+      //Zephyr
+      Object.keys(zephyrkills).map(function(objectKey, index) {
+        for (var i = 0; i < zephyrkills[objectKey].length; i++) {
+          if (zephyrkills[objectKey][i+1]) {
+            if ((zephyrkills[objectKey][i]-zephyrkills[objectKey][i+1]) > -5000 && (zephyrkills[objectKey][i]-zephyrkills[objectKey][i+1]) < 5000) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyZephyrkill":1} },{upsert: true});
+            }
+          }
+        }
+      });
+
+      //Valkyr
+      Object.keys(valkyrkills).map(function(objectKey, index) {
+        for (var i = 0; i < valkyrkills[objectKey].length; i++) {
+          if (valkyrkills[objectKey][i+1] && valkyrkills[objectKey][i+2]) {
+            if ((valkyrkills[objectKey][i]-valkyrkills[objectKey][i+1]) > -10000 && (valkyrkills[objectKey][i]-valkyrkills[objectKey][i+1]) < 10000 && (valkyrkills[objectKey][i]-valkyrkills[objectKey][i+2]) > -10000 && (valkyrkills[objectKey][i]-valkyrkills[objectKey][i+2]) < 10000) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyValkyrkill":1} },{upsert: true});
+            }
+          }
+        }
+      });
+
+      //Trinity
+      Object.keys(trinitykills).map(function(objectKey, index) {
+        for (var i = 0; i < trinitykills[objectKey].length; i++) {
+          if (trinitykills[objectKey][i+1]) {
+            if ((trinitykills[objectKey][i]-trinitykills[objectKey][i+1]) > -15000 && (trinitykills[objectKey][i]-trinitykills[objectKey][i+1]) < 15000) {
+              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTrinitykill":1} },{upsert: true});
+            }
+          }
+        }
+      });
+    } catch (e) {}
+
+    db.close();
+  });
 
 }
 
 function GetDBInfo(request) {
   MongoClient.connect(url, opts, function(err, db) {
-    db.collection('players_'+ServerName).find({}).toArray(function(err, docs) {
-      message = '';
-      if (request.query == "kill") {
-        docs.forEach(function (e) {
-          if (e.Name == request.killer) {
-            if (e.Kills > 0) {
-              if (request.vw) {
-                kov = "KillOn"+request.vw;
-                kww = "KillsWith"+request.vw.replace(" ","");
-                if (e.kov > 0) {
-                  message = request.killer+" have "+e.kov+" kills registered on "+request.vw+". :>";
-                } else {
-                  if (e.kww > 0) {
-                    message = request.killer+" have "+e.kww+" kills registered with "+request.vw+". :>";
+
+    try {
+      db.collection('players_'+ServerName).find({}).toArray(function(err, docs) {
+        message = '';
+        if (request.query == "kill") {
+          docs.forEach(function (e) {
+            if (e.Name == request.killer) {
+              if (e.Kills > 0) {
+                if (request.vw) {
+                  kov = "KillOn"+request.vw;
+                  kww = "KillsWith"+request.vw.replace(" ","");
+                  if (e.kov > 0) {
+                    message = request.killer+" have "+e.kov+" kills registered on "+request.vw+". :>";
                   } else {
-                    message = request.killer+" have no kills registered on/with "+request.vw+". :>";
+                    if (e.kww > 0) {
+                      message = request.killer+" have "+e.kww+" kills registered with "+request.vw+". :>";
+                    } else {
+                      message = request.killer+" have no kills registered on/with "+request.vw+". :>";
+                    }
                   }
-                }
-              } else {
-                message = request.killer+" have "+e.Kills+" kills registered. :>";
-              }
-            } else {
-              message = "I don't have anything about kills by "+request.killer+" in my database. :<";
-            }
-          }
-        });
-        if (message == '') {
-          message = "I don't have anything about "+request.killer+" in my database. :<";
-        }
-      }
-
-      if (request.query == "death") {
-        docs.forEach(function (e) {
-          if (e.Name == request.victim) {
-            if (e.Deaths > 0) {
-              if (request.kw) {
-                kww = "DeathBy"+request.kw.replace(" ","");
-                if (e.kww > 0) {
-                  message = request.victim+" have "+e.kww+" deaths registered from "+request.kw+". :>";
                 } else {
-                  message = request.victim+" have no deaths registered from "+request.kw+". :>";
+                  message = request.killer+" have "+e.Kills+" kills registered. :>";
                 }
               } else {
-                message = request.victim+" have "+e.Deaths+" deaths registered. :>";
+                message = "I don't have anything about kills by "+request.killer+" in my database. :<";
               }
-            } else {
-              message = "I don't have anything about "+request.killer+"'s deaths in my database. :<";
             }
+          });
+          if (message == '') {
+            message = "I don't have anything about "+request.killer+" in my database. :<";
           }
-        });
-        if (message == '') {
-          message = "I don't have anything about "+request.victim+" in my database. :<";
         }
-      }
 
-      if (request.query == "KDR") {
-        docs.forEach(function (e) {
-          if (e.Name == request.victim) {
-            if (e.Deaths > 0 && e.Kills >= 0) {
-              message = request.kdr+" have a "+(e.Kills/e.Deaths)+" Kill/Death Rate. :>";
-            } else if(e.Deaths > 0 && e.Kills == undefined) {
-              message = request.kdr+" have a "+(0.5/e.Deaths)+" Kill/Death Rate. :>";
-            }
-          }
-        });
-        if (message == '') {
-          message = "I don't have anything about "+request.kdr+" in my database. :<";
-        }
-      }
-
-      if (request.query == "weapon") {
-        docs.forEach(function (e) {
-          kww = "KillsWith"+request.weapon.replace(" ","");
-          dbw = "DeathBy"+request.weapon.replace(" ","");
-          totalkills = 0;
-          if (e.dbw > 0) {
-            totalkills += e.dbw;
-          }
-
-          if (totalkills == 0) {
-            message = "I don't have anything about kills with "+request.weapon+" in my database. :<";
-          } else {
-            if (request.wv) {
-              if (e.Name == request.wv && e.dbw > 0) {
-                message = request.weapon+" have "+e.dbw+" kills registered on "+request.wv+". :>";
+        if (request.query == "death") {
+          docs.forEach(function (e) {
+            if (e.Name == request.victim) {
+              if (e.Deaths > 0) {
+                if (request.kw) {
+                  kww = "DeathBy"+request.kw.replace(" ","");
+                  if (e.kww > 0) {
+                    message = request.victim+" have "+e.kww+" deaths registered from "+request.kw+". :>";
+                  } else {
+                    message = request.victim+" have no deaths registered from "+request.kw+". :>";
+                  }
+                } else {
+                  message = request.victim+" have "+e.Deaths+" deaths registered. :>";
+                }
               } else {
-                message = "I don't have anything about kills with "+request.weapon+" on "+request.wv+" in my database. :<";
+                message = "I don't have anything about "+request.killer+"'s deaths in my database. :<";
               }
-            } else {
-              message = request.weapon+" have "+totalkills+" kills registered. :>";
             }
+          });
+          if (message == '') {
+            message = "I don't have anything about "+request.victim+" in my database. :<";
           }
-        });
-        if (message == '') {
-          message = "I don't have anything about "+request.kdr+" in my database. :<";
         }
-      }
 
-      bot.sendMessage({
-        to: request.channel,
-        message: message
+        if (request.query == "KDR") {
+          docs.forEach(function (e) {
+            if (e.Name == request.victim) {
+              if (e.Deaths > 0 && e.Kills >= 0) {
+                message = request.kdr+" have a "+(e.Kills/e.Deaths)+" Kill/Death Rate. :>";
+              } else if(e.Deaths > 0 && e.Kills == undefined) {
+                message = request.kdr+" have a "+(0.5/e.Deaths)+" Kill/Death Rate. :>";
+              }
+            }
+          });
+          if (message == '') {
+            message = "I don't have anything about "+request.kdr+" in my database. :<";
+          }
+        }
+
+        if (request.query == "weapon") {
+          docs.forEach(function (e) {
+            kww = "KillsWith"+request.weapon.replace(" ","");
+            dbw = "DeathBy"+request.weapon.replace(" ","");
+            totalkills = 0;
+            if (e.dbw > 0) {
+              totalkills += e.dbw;
+            }
+
+            if (totalkills == 0) {
+              message = "I don't have anything about kills with "+request.weapon+" in my database. :<";
+            } else {
+              if (request.wv) {
+                if (e.Name == request.wv && e.dbw > 0) {
+                  message = request.weapon+" have "+e.dbw+" kills registered on "+request.wv+". :>";
+                } else {
+                  message = "I don't have anything about kills with "+request.weapon+" on "+request.wv+" in my database. :<";
+                }
+              } else {
+                message = request.weapon+" have "+totalkills+" kills registered. :>";
+              }
+            }
+          });
+          if (message == '') {
+            message = "I don't have anything about "+request.kdr+" in my database. :<";
+          }
+        }
+
+        bot.sendMessage({
+          to: request.channel,
+          message: message
+        });
       });
-    });
+    } catch (e) {}
+
+    db.close();
   });
 
 }

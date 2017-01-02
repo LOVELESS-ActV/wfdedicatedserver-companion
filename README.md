@@ -78,5 +78,5 @@ open run.bat
 <hr>
 <img src="http://i.imgur.com/orHFcwp.jpg"><br/>
 <hr>
-<img src="http://i.imgur.com/qdR0iMG.png"><br/>
+<img src="http://i.imgur.com/xenEOXH.jpg"><br/>
 </p>

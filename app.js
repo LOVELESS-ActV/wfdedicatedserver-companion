@@ -11,6 +11,7 @@ var channels = [];
 var port = 8080;
 var logfile = 'DedicatedServer.log';
 var opts = {db: {authSource: 'admin'}};
+var weapons = {};
 var url = '';
 var urldata = '';
 try {
@@ -21,11 +22,23 @@ try {
   ServerName = JSON.parse(fs.readFileSync("./config.ini").toString()).ServerName;
   DBuser = JSON.parse(fs.readFileSync("./config.ini").toString()).DBuser;
   DBpwd = JSON.parse(fs.readFileSync("./config.ini").toString()).DBpwd;
-  url = "mongodb://"+DBuser+":"+DBpwd+"@livjatanserver.tk:27017/"+DBuser+"?connectTimeoutMS=300000";
+  DBname = JSON.parse(fs.readFileSync("./config.ini").toString()).DBname;
+  url = "mongodb://"+DBuser+":"+DBpwd+"@livjatanserver.tk:27017/"+DBname+"?connectTimeoutMS=300000";
   urldata = "mongodb://"+DBuser+":"+DBpwd+"@livjatanserver.tk:27017/data?connectTimeoutMS=300000";
+  function PullWeaponsFromDB(callback) {
+    MongoClient.connect(urldata, opts, function(err, db) {
+      db.collection('weapons').find({}).toArray(function(err, out) {
+        return callback(out);
+      });
+    });
+  }
+
+  PullWeaponsFromDB(function(items) {
+    weapons = items[0];
+  });
 } catch(ex) {
   if(ex.code == "ENOENT") {
-    fs.writeFile('./config.ini', '{"token":"","channels":[""],"port":8080,"log":"DedicatedServer.log","ServerName":"SomeServer01","DBuser":"AskMeForThat","DBpwd":"Same"}');
+    fs.writeFile('./config.ini', '{"token":"","channels":[""],"port":8080,"log":"DedicatedServer.log","ServerName":"SomeServer01","DBuser":"AskMeForThat","DBpwd":"Same","DBname":"Same"}');
     console.log("config.ini created. Please fill the info needed in it.");
     fs.writeFile('run.bat', "node app.js \r\npause");
     console.log("run.bat created as well. You can start this tool from it now.");
@@ -66,19 +79,6 @@ var starttime;
 var monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
-var weapons = {};
-
-function PullWeaponsFromDB(callback) {
-  MongoClient.connect(urldata, opts, function(err, db) {
-    db.collection('weapons').find({}).toArray(function(err, out) {
-      return callback(out);
-    });
-  });
-}
-
-PullWeaponsFromDB(function(items) {
-  weapons = items[0];
-});
 
 var maps = require('./maps.json');
 var games = require('./games.json');
@@ -91,6 +91,15 @@ setTimeout(function () {
       autorun: true,
       token: token
   });
+
+setTimeout(function () {
+  if (!bot.connected) {
+    console.log("Token invalid !");
+    setTimeout(function () {
+      process.exit();
+    }, 1000);
+  }
+}, 3000);
 
 bot.on('ready', function () {
   console.log(bot.username + " - (" + bot.id + ")");
@@ -167,41 +176,6 @@ bot.on('ready', function () {
       } catch (e) {}
     });
   });
-  server.get('/players.json', function(req, res){
-    MongoClient.connect("mongodb://Tenno:WarframePvP@livjatanserver.tk:27017/", opts, function(err, db) {
-      dblist = [];
-      var getplayers = function (dbp, callback) {
-        dbp.collection('players').find({}).toArray(function(err, out) {
-          callback(out);
-        });
-      }
-      db.admin().listDatabases(function(err, dbs) {
-        dbs.databases.forEach(function (db) {
-          if (db.name != "admin" && db.name != "local" && db.name != "data" && db.name != "Tenno") {
-            MongoClient.connect("mongodb://Tenno:WarframePvP@livjatanserver.tk:27017/"+db.name, opts, function(err, dbp) {
-              getplayers(dbp, function (inp) {
-                MongoClient.connect("mongodb://Tenno:WarframePvP@livjatanserver.tk:27017/Tenno", opts, function(err, dbpl) {
-                  for (var i = 0; i < inp.length; i++) {
-                    delete inp[i]["_id"];
-                    localname = inp[i]["Name"];
-                    delete inp[i]["Name"];
-                    dbpl.collection('players').update({ "Name":localname },{ $inc: inp[i] },{upsert: true});
-                  }
-                  dbp.close();
-                  getplayers(dbpl, function (out) {
-                    dbpl.collection('players').remove();
-                    dbpl.close();
-                    res.json(out);
-                  })
-                });
-              });
-            });
-          }
-        });
-        db.close();
-      });
-    });
-  });
   server.listen(port, function (e) {
     console.log('WebServer started. Go to http://localhost:'+port+'/');
   }).on('error', function (e) {
@@ -212,6 +186,67 @@ bot.on('ready', function () {
       }, 1000);
     }
   });
+
+  function fuseallDB(db, callback) {
+    db.collection('players').find({}).toArray(function(err, out) {
+      if (err) {}
+      callback(out);
+    });
+  }
+
+  function savePlayerstoJSON(db, callback) {
+    db.collection('players').find({}).toArray(function(err, out) {
+      if (err) {}
+      callback(out);
+    });
+  }
+
+  setInterval(function () {
+    try {
+      MongoClient.connect("mongodb://Tenno:WarframePvP@livjatanserver.tk:27017/", opts, function(err, db) {
+        dblist = [];
+        db.admin().listDatabases(function(err, dbs) {
+          MongoClient.connect("mongodb://Tenno:WarframePvP@livjatanserver.tk:27017/Tenno", opts, function(err, dbt) {
+            dbs.databases.forEach(function (db) {
+              if (db.name != "admin" && db.name != "local" && db.name != "data" && db.name != "Tenno") {
+                MongoClient.connect("mongodb://Tenno:WarframePvP@livjatanserver.tk:27017/"+db.name, opts, function(err, dbb) {
+                  try {
+                    fuseallDB(dbb, function (inp) {
+                      for (var i = 0; i < inp.length; i++) {
+                        delete inp[i]["_id"];
+                        localname = inp[i]["Name"].replace(/\./,"\uff0e");
+                        delete inp[i]["Name"];
+                        dbt.collection('players').update({ "Name":localname.replace(/\./,"\uff0e") },{ $inc: inp[i] },{upsert: true}, function (err, res) {
+                          if (err) {}
+                        });
+                      }
+                      dbb.close();
+                    });
+                  } catch (e) {}
+                });
+              }
+            });
+          });
+          db.close();
+          if (err) {}
+        });
+        if (err) {}
+      });
+    } catch (e) {} finally {
+      setTimeout(function () {
+        MongoClient.connect("mongodb://Tenno:WarframePvP@livjatanserver.tk:27017/Tenno", opts, function(err, dbt) {
+          try {
+            savePlayerstoJSON(dbt, function (out) {
+              console.log("Updated players.json !");
+              fs.writeFile('./players.json', JSON.stringify(out, null, "\t"), 'utf-8');
+              dbt.collection('players').remove();
+              dbt.close();
+            });
+          } catch (e) {}
+        });
+      }, 10000);
+    }
+  }, 60000);
 
   console.log(PvPHostName+"_Server is running "+PvPHost["gameMode"]+", in "+PvPHost["region"]+" region, with RC "+PvPHost["RC"]+".");
   console.log("");
@@ -397,29 +432,38 @@ function CheckKills() {
   var kills = [];
   bufferk = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
   bufferk.forEach(function (e) {
-    wp = getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(" ", ""));
     if (e.indexOf('was killed') > -1 && e.indexOf('using a') > -1) {
-      if (e.indexOf('DamageTrigger') > -1) {
-        if (wp !== '') {
+      wp = getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(/ /g, '+'));
+      if (e.indexOf('/Layer') > -1 || e.indexOf('DamageTrigger') > -1) {
           kill = {
             timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
             victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
-            killer: "Map",
-            weapon: wp,
-            dmg: e.slice(e.indexOf('by ')+3, e.indexOf(' damage'))
+            killer: "Map"
           };
-        } else {
-          e = e+"\n";
-          kill = {
-            timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
-            victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
-            killer: "Map",
-            weapon: "Unknown Weapon",
-            dmg: e.slice(e.indexOf('by ')+3, e.indexOf(' damage'))
-          };
-        }
+          if (e.indexOf('/Layer4') > -1) {
+            if (e.indexOf('DamageTrigger3') > -1) {
+              kill.weapon = "Environment";
+            } else {
+              kill.weapon = "Grineer Poison";
+            }
+          } else if (e.indexOf('/Layer1/DamageTrigger0') > -1) {
+            kill.weapon = "Electric Floor";
+          } else if (e.indexOf('/Layer1/DamageTrigger1') > -1) {
+            kill.weapon = "Fire";
+          } else if (e.indexOf('/Layer2/CorpusCoreLaserBeam') > -1) {
+            kill.weapon = "Corpus Laser Beam";
+          } else {
+            kill.weapon = "Environment";
+          }
+          if (e.slice(e.indexOf('by ')+3, e.indexOf(' damage')).indexOf("/") > -1) {
+            kill.shielddmg = e.slice(e.indexOf('by ')+3, e.indexOf(' / '));
+            kill.healthdmg = e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'));
+          } else {
+            kill.shielddmg = "0";
+            kill.healthdmg = e.slice(e.indexOf('by ')+3, e.indexOf(' damage'));
+          }
       } else {
-        if (wp !== '') {
+        if (wp != '') {
           kill = {
             timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
             victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
@@ -435,13 +479,6 @@ function CheckKills() {
             weapon: "Unknown Weapon"
           };
         }
-        if (e.indexOf("/") > -1) {
-          kill.shielddmg = e.slice(e.indexOf('by ')+3, e.indexOf(' / '));
-          kill.healthdmg = e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'));
-        } else {
-          kill.shielddmg = "0";
-          kill.healthdmg = e.slice(e.indexOf('by ')+3, e.indexOf(' damage'));
-        }
         if (!(/^\+?(0|[1-9]\d*)$/.test(e.slice(0, 1)))) {
           kill.timestamp = 0;
           if (e.indexOf(":") > -1) {
@@ -450,9 +487,31 @@ function CheckKills() {
             kill.victim = "Unknown";
           }
         }
+        if (e.indexOf("/") > -1) {
+          kill.shielddmg = e.slice(e.indexOf('by ')+3, e.indexOf(' / '));
+          kill.healthdmg = e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'));
+        } else {
+          kill.shielddmg = "0";
+          kill.healthdmg = e.slice(e.indexOf('by ')+3, e.indexOf(' damage'));
+        }
       }
       if (kill.killer == "a level 20 TURRET") {
         kill.killer = "BunkersGrineerTurret";
+      }
+      kills.push(kill);
+    } else if (e.indexOf('was killed') > -1) {
+      kill = {
+        timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
+        victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
+        killer: e.slice(e.indexOf('from ')+5, e.length),
+        weapon: "Bullet Jump"
+      };
+      if (e.indexOf("/") > -1) {
+        kill.shielddmg = e.slice(e.indexOf('by ')+3, e.indexOf(' / '));
+        kill.healthdmg = e.slice(e.indexOf(' / ')+3, e.indexOf(' damage'));
+      } else {
+        kill.shielddmg = "0";
+        kill.healthdmg = e.slice(e.indexOf('by ')+3, e.indexOf(' damage'));
       }
       kills.push(kill);
     }
@@ -484,8 +543,8 @@ function CheckKills() {
       };
       gamebufferindex++;
       //DBStuff
-      PushKillToDB(e.victim.replace(".","\uff0e"),e.killer.replace(".","\uff0e"),e.weapon.replace(' ',''));
-      CheckAchievements(e.timestamp,e.victim.replace(".","\uff0e"),e.killer.replace(".","\uff0e"),e.weapon,e.shielddmg,e.healthdmg);
+      PushKillToDB(e.victim.replace(/\./g,"\uff0e"),e.killer.replace(/\./g,"\uff0e"),e.weapon.replace(' ',''));
+      CheckAchievements(e.timestamp,e.victim.replace(/\./g,"\uff0e"),e.killer.replace(/\./g,"\uff0e"),e.weapon,e.shielddmg,e.healthdmg);
     }, ik);
     ik += 1337; //( ͡° ͜ʖ ͡°)
   })
@@ -662,20 +721,20 @@ function CheckMaps() {
           n = Math.floor(1+(Math.random()*9)).toString();
         }
         for (var prop in teamstatus) delete teamstatus[prop];
-        //Set new gamebuffer
-        EndOfGameAchievements();
-        if (gamebuffer.length > 0) {
-          games[e.timestamp] = gamebuffer;
-          games[e.timestamp].push({"Map":gamemap});
-        }
-        gamebufferindex = 0;
-        gamebuffer = [];
-        killingspree = {};
-        rev = {};
-        gamemap = e.map;
-        fs.writeFile('./games.json', JSON.stringify(games, null, "\t"), 'utf-8');
         UploadToChat("data/maps/"+e.map.replace(' ','')+"/"+n+".png",'`['+date+']'+' Server has switched map to '+e.map+'.`');
       }
+      //Set new gamebuffer
+      if (gamebuffer.length > 0) {
+        EndOfGameAchievements();
+        games[e.timestamp] = gamebuffer;
+        games[e.timestamp].push({"Map":gamemap});
+      }
+      gamebufferindex = 0;
+      gamebuffer = [];
+      killingspree = {};
+      rev = {};
+      gamemap = e.map;
+      fs.writeFile('./games.json', JSON.stringify(games, null, "\t"), 'utf-8');
     }, im);
     im += 1337; //( ͡° ͜ʖ ͡°)
   })
@@ -773,7 +832,11 @@ function PushKillToDB(victim, killer, weapon) {
       kquery[kww] = 1;
       kquery[kov] = 1;
       collection.update({ "Name":killer },{ $inc: kquery },{upsert: true});
-    } catch (e) {}
+    } catch (e) {
+      setTimeout(function () {
+        PushKillToDB(victim, killer, weapon);
+      }, 1000);
+    }
 
     db.close();
   });
@@ -782,54 +845,49 @@ function PushKillToDB(victim, killer, weapon) {
 function CheckAchievements(timestamp,victim,killer,weapon,damage,totaldamage) {
 
   MongoClient.connect(url, opts, function(err, db) {
-    var collection = db.collection('players');
 
     try {
       //OverkillTrophy
       if (parseInt(totaldamage)-parseInt(damage) > 200) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophyOverkill1":1} },{upsert: true});
+        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOverkill1":1} },{upsert: true});
       }
       if (parseInt(totaldamage)-parseInt(damage) > 250) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophyOverkill2":1} },{upsert: true});
+        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOverkill2":1} },{upsert: true});
       }
       if (parseInt(totaldamage)-parseInt(damage) > 300) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophyOverkill3":1} },{upsert: true});
+        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOverkill3":1} },{upsert: true});
       }
 
       //SniperHeadshotTrophy
       if (weapon == "Snipetron" && parseInt(totaldamage) > 250) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
       }
       if (weapon == "Snipetron Vandal" && parseInt(totaldamage) > 230) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophyOverkill3":1} },{upsert: true});
-          if (!db[killer]["hasTrophySniperHS"]) {
-            db[killer]["hasTrophySniperHS"] = 0;
-          }
-          db[killer]["hasTrophySniperHS"] += 1;
+        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOverkill3":1} },{upsert: true});
       }
       if (weapon == "Rubico" && parseInt(totaldamage) > 250) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
       }
       if (weapon == "Vectis" && parseInt(totaldamage) > 247) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
       }
       if (weapon == "Vectis Prime" && parseInt(totaldamage) > 240) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
       }
       if (weapon == "Lanka" && parseInt(totaldamage) > 260) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
       }
 
       //OneshotTrophy
       if (parseInt(totaldamage) > 310) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophyOneshot1":1} },{upsert: true});
+        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOneshot1":1} },{upsert: true});
         if (!oneshots[killer] || oneshots[killer] == 0) {
           oneshots[killer] = 1;
         } else if (oneshots[killer] == 1) {
-          collection.update({ "Name":killer },{ $inc: {"hasTrophyOneshot2":1} },{upsert: true});
+          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOneshot2":1} },{upsert: true});
           oneshots[killer] = 2;
         } else if (oneshots[killer] >= 2) {
-          collection.update({ "Name":killer },{ $inc: {"hasTrophyOneshot3":1} },{upsert: true});
+          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOneshot3":1} },{upsert: true});
           oneshots[killer] += 1;
         }
       } else {
@@ -840,14 +898,14 @@ function CheckAchievements(timestamp,victim,killer,weapon,damage,totaldamage) {
 
       //StaffKillTrophy
       if (victim.indexOf("[DE]") > -1) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophyStaffKill":1} },{upsert: true});
+        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyStaffKill":1} },{upsert: true});
       }
 
       //MutualKillTrophies
       gamebuffer.forEach(function (e) {
         if (e.victim == killer || e.killer == victim) {
           if (e.timestamp-timestamp < 500 && e.timestamp-timestamp > -500) {
-            collection.update({ "Name":killer },{ $inc: {"hasTrophyMutualKill1":1} },{upsert: true});
+            db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyMutualKill1":1} },{upsert: true});
           }
         }
       });
@@ -855,19 +913,10 @@ function CheckAchievements(timestamp,victim,killer,weapon,damage,totaldamage) {
       //RevengeTrophy
       rev[victim] = killer;
       if (rev[killer] == victim) {
-        collection.update({ "Name":killer },{ $inc: {"hasTrophyRevenge":1} },{upsert: true});
+        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyRevenge":1} },{upsert: true});
       }
 
       //KillingSpreeTrophies
-      killingspreemka = {};
-      gamebuffer.forEach(function (e) {
-        if (!killingspreemka[e.killer]) {
-          killingspreemka[e.killer] = 1;
-        } else {
-          killingspreemka[e.killer] += 1;
-        }
-      });
-      killingspreemk = Object.keys(killingspreemka).reduce(function(a, b){ return killingspreemka[a] > killingspreemka[b] ? a : b });
       if (killingspree[victim]) {
         killingspree[victim] = 0;
       }
@@ -875,26 +924,30 @@ function CheckAchievements(timestamp,victim,killer,weapon,damage,totaldamage) {
         killingspree[killer] = 1;
       } else {
         killingspree[killer] += 1;
-        if (killingspree[killer] >= 5) {
-          collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree1":1} },{upsert: true});
+        if (killingspree[killer] == 5) {
+          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyKillingspree1":1} },{upsert: true});
         }
-        if (killingspree[killer] >= 10) {
-          collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree2":1} },{upsert: true});
+        if (killingspree[killer] == 10) {
+          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyKillingspree2":1} },{upsert: true});
         }
-        if (killingspree[killer] >= 15) {
-          collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree3":1} },{upsert: true});
+        if (killingspree[killer] == 15) {
+          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyKillingspree3":1} },{upsert: true});
         }
-        if (killingspree[killer] >= 20) {
-          collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree4":1} },{upsert: true});
+        if (killingspree[killer] == 20) {
+          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyKillingspree4":1} },{upsert: true});
         }
-        if (killingspree[killer] >= 25) {
-          collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree5":1} },{upsert: true});
+        if (killingspree[killer] == 25) {
+          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyKillingspree5":1} },{upsert: true});
         }
-        if (killingspree[killer] >= 30) {
-          collection.update({ "Name":killer },{ $inc: {"hasTrophyKillingspree6":1} },{upsert: true});
+        if (killingspree[killer] == 30) {
+          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyKillingspree6":1} },{upsert: true});
         }
       }
-    } catch (e) {}
+
+    } catch (e) {
+      console.log(e);
+      process.exit(1);
+    }
 
     db.close();
   });
@@ -1201,7 +1254,7 @@ function EndOfGameAchievements() {
           } else {
             zephyrkills[e.killer].push(e.timestamp);
           }
-        } else if (e.weapon.indexOf("Valkyr")>-1 && e.totaldamage > 300) {
+        } else if (e.weapon.indexOf("Valkyr")>-1 && e.totaldamage > 110) {
           if (!valkyrkills[e.killer]) {
             valkyrkills[e.killer] = [];
             valkyrkills[e.killer].push(e.timestamp);

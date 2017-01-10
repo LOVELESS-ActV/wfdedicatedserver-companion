@@ -14,6 +14,9 @@ var opts = {db: {authSource: 'admin'}};
 var weapons = {};
 var url = '';
 var urldata = '';
+var ratelimit = require('ratelimit');
+var bytesPerSecond = 1500000; //1.5mb
+ratelimit(stream, bytesPerSecond);
 try {
   token = JSON.parse(fs.readFileSync("./config.ini").toString()).token;
   channels = JSON.parse(fs.readFileSync("./config.ini").toString()).channels;
@@ -170,7 +173,9 @@ bot.on('ready', function () {
     MongoClient.connect(url, opts, function(err, db) {
       try {
         db.collection('ServerInfo').find({}).toArray(function(err, out) {
-          db.close();
+          db.close(function (err, res) {
+  if (err) {}
+});
           res.json(out);
         });
       } catch (e) {}
@@ -227,7 +232,9 @@ bot.on('ready', function () {
               }
             });
           });
-          db.close();
+          db.close(function (err, res) {
+  if (err) {}
+});
           if (err) {}
         });
         if (err) {}
@@ -259,7 +266,9 @@ bot.on('ready', function () {
     PvPHost["Name"] = ServerName;
     serverquery = PvPHost;
     collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
-    db.close();
+    db.close(function (err, res) {
+  if (err) {}
+});
   });
 
   lastline = "";
@@ -571,7 +580,9 @@ function CheckJoins() {
           var collection = db.collection("ServerInfo");
           serverquery = PvPHost;
           collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
-          db.close();
+          db.close(function (err, res) {
+  if (err) {}
+});
         });
       }
       SendToChat('`['+date+']'+' '+e.player+' has joined.'+'`');
@@ -604,7 +615,9 @@ function CheckTeams() {
               var collection = db.collection("ServerInfo");
               serverquery = PvPHost;
               collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
-              db.close();
+              db.close(function (err, res) {
+  if (err) {}
+});
             });
             SendToChat('`['+date+']'+' '+e.player+' is now on team Sun.`');
           } else if (e.team == '1') {
@@ -614,7 +627,9 @@ function CheckTeams() {
               var collection = db.collection("ServerInfo");
               serverquery = PvPHost;
               collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
-              db.close();
+              db.close(function (err, res) {
+  if (err) {}
+});
             });
             SendToChat('`['+date+']'+' '+e.player+' is now on team Moon.`');
           }
@@ -627,7 +642,9 @@ function CheckTeams() {
             var collection = db.collection("ServerInfo");
             serverquery = PvPHost;
             collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
-            db.close();
+            db.close(function (err, res) {
+  if (err) {}
+});
           });
           SendToChat('`['+date+']'+' '+e.player+' is now on team Sun.`');
         } else {
@@ -637,7 +654,9 @@ function CheckTeams() {
             var collection = db.collection("ServerInfo");
             serverquery = PvPHost;
             collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
-            db.close();
+            db.close(function (err, res) {
+  if (err) {}
+});
           });
           SendToChat('`['+date+']'+' '+e.player+' is now on team Moon.`');
         }
@@ -838,7 +857,9 @@ function PushKillToDB(victim, killer, weapon) {
       }, 1000);
     }
 
-    db.close();
+    db.close(function (err, res) {
+  if (err) {}
+});
   });
 }
 
@@ -949,7 +970,9 @@ function CheckAchievements(timestamp,victim,killer,weapon,damage,totaldamage) {
       process.exit(1);
     }
 
-    db.close();
+    db.close(function (err, res) {
+      if (err) {}
+    });
   });
 
 }
@@ -1404,7 +1427,9 @@ function EndOfGameAchievements() {
       });
     } catch (e) {}
 
-    db.close();
+    db.close(function (err, res) {
+      if (err) {}
+    });
   });
 
 }
@@ -1518,7 +1543,9 @@ function GetDBInfo(request) {
       });
     } catch (e) {}
 
-    db.close();
+    db.close(function (err, res) {
+  if (err) {}
+});
   });
 
 }

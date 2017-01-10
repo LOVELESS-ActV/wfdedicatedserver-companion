@@ -8,7 +8,8 @@
     "express": "^4.14.0",
     "fs": "0.0.1-security",
     "mongodb": "^2.2.16",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "ratelimit": "0.0.4"
   },
   "devDependencies": {},
   "scripts": {

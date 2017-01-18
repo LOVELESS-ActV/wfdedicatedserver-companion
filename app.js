@@ -1,14 +1,10 @@
 ﻿var fs = require('fs');
 var Discord = require('discord.io');
-var express = require('express'),
-    server = express();
 var MongoClient = require('mongodb').MongoClient;
-var path = require('path');
 var isConfig = false;
 var token = 'DedicatedServer';
 var channels = [];
 //Feel free to change this to whatever you wish.
-var port = 8080;
 var logfile = 'DedicatedServer.log';
 var opts = {db: {authSource: 'admin'}};
 var weapons = {};
@@ -16,11 +12,10 @@ var url = '';
 var urldata = '';
 var ratelimit = require('ratelimit');
 var bytesPerSecond = 1500000; //1.5mb
-ratelimit(stream, bytesPerSecond);
+ratelimit(MongoClient, bytesPerSecond);
 try {
   token = JSON.parse(fs.readFileSync("./config.ini").toString()).token;
   channels = JSON.parse(fs.readFileSync("./config.ini").toString()).channels;
-  port = JSON.parse(fs.readFileSync("./config.ini").toString()).port;
   logfile = JSON.parse(fs.readFileSync("./config.ini").toString()).log;
   ServerName = JSON.parse(fs.readFileSync("./config.ini").toString()).ServerName;
   DBuser = JSON.parse(fs.readFileSync("./config.ini").toString()).DBuser;
@@ -31,7 +26,14 @@ try {
   function PullWeaponsFromDB(callback) {
     MongoClient.connect(urldata, opts, function(err, db) {
       db.collection('weapons').find({}).toArray(function(err, out) {
-        return callback(out);
+        if (err) {
+          console.log("Failed to retrieve weapons.");
+          setTimeout(function () {
+            process.exit();
+          }, 100);
+        } else {
+          callback(out);
+        }
       });
     });
   }
@@ -102,7 +104,7 @@ setTimeout(function () {
       process.exit();
     }, 1000);
   }
-}, 3000);
+}, 5000);
 
 bot.on('ready', function () {
   console.log(bot.username + " - (" + bot.id + ")");
@@ -164,96 +166,22 @@ bot.on('ready', function () {
   PvPHost["Players"] = [];
 
   SendToChat(bot.username+" has successfully initiated. Starting loging...");
-  server.use('/app', express.static(__dirname + '/app'));
-  server.use(express.static(__dirname));
-  server.get('/', function(req, res){
-    res.sendFile(path.join(__dirname + '/index.html'));
-  });
-  server.get('/server.json', function(req, res){
-    MongoClient.connect(url, opts, function(err, db) {
-      try {
-        db.collection('ServerInfo').find({}).toArray(function(err, out) {
-          db.close(function (err, res) {
-  if (err) {}
-});
-          res.json(out);
-        });
-      } catch (e) {}
-    });
-  });
-  server.listen(port, function (e) {
-    console.log('WebServer started. Go to http://localhost:'+port+'/');
-  }).on('error', function (e) {
-    if (e.code == 'EADDRINUSE') {
-      console.log("Port "+port+" already in use...");
-      console.log("Change it in config.ini !");
-      setTimeout(function () {
-      }, 1000);
-    }
-  });
 
   function fuseallDB(db, callback) {
     db.collection('players').find({}).toArray(function(err, out) {
-      if (err) {}
-      callback(out);
+      if (err) {} else {
+        callback(out);
+      }
     });
   }
 
   function savePlayerstoJSON(db, callback) {
     db.collection('players').find({}).toArray(function(err, out) {
-      if (err) {}
-      callback(out);
+      if (err) {} else {
+        callback(out);
+      }
     });
   }
-
-  setInterval(function () {
-    try {
-      MongoClient.connect("mongodb://Tenno:WarframePvP@livjatanserver.tk:27017/", opts, function(err, db) {
-        dblist = [];
-        db.admin().listDatabases(function(err, dbs) {
-          MongoClient.connect("mongodb://Tenno:WarframePvP@livjatanserver.tk:27017/Tenno", opts, function(err, dbt) {
-            dbs.databases.forEach(function (db) {
-              if (db.name != "admin" && db.name != "local" && db.name != "data" && db.name != "Tenno") {
-                MongoClient.connect("mongodb://Tenno:WarframePvP@livjatanserver.tk:27017/"+db.name, opts, function(err, dbb) {
-                  try {
-                    fuseallDB(dbb, function (inp) {
-                      for (var i = 0; i < inp.length; i++) {
-                        delete inp[i]["_id"];
-                        localname = inp[i]["Name"].replace(/\./,"\uff0e");
-                        delete inp[i]["Name"];
-                        dbt.collection('players').update({ "Name":localname.replace(/\./,"\uff0e") },{ $inc: inp[i] },{upsert: true}, function (err, res) {
-                          if (err) {}
-                        });
-                      }
-                      dbb.close();
-                    });
-                  } catch (e) {}
-                });
-              }
-            });
-          });
-          db.close(function (err, res) {
-  if (err) {}
-});
-          if (err) {}
-        });
-        if (err) {}
-      });
-    } catch (e) {} finally {
-      setTimeout(function () {
-        MongoClient.connect("mongodb://Tenno:WarframePvP@livjatanserver.tk:27017/Tenno", opts, function(err, dbt) {
-          try {
-            savePlayerstoJSON(dbt, function (out) {
-              console.log("Updated players.json !");
-              fs.writeFile('./players.json', JSON.stringify(out, null, "\t"), 'utf-8');
-              dbt.collection('players').remove();
-              dbt.close();
-            });
-          } catch (e) {}
-        });
-      }, 10000);
-    }
-  }, 60000);
 
   console.log(PvPHostName+"_Server is running "+PvPHost["gameMode"]+", in "+PvPHost["region"]+" region, with RC "+PvPHost["RC"]+".");
   console.log("");
@@ -265,10 +193,13 @@ bot.on('ready', function () {
     var collection = db.collection("ServerInfo");
     PvPHost["Name"] = ServerName;
     serverquery = PvPHost;
+    serverquery["LastUpdate"] = new Date().getTime();
+    serverquery["Logging"] = true;
+    serverquery["CurrentMap"] = "Unknown Map";
     collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
     db.close(function (err, res) {
-  if (err) {}
-});
+      if (err) {}
+    });
   });
 
   lastline = "";
@@ -288,6 +219,7 @@ bot.on('ready', function () {
         });
       });
       setTimeout(function () {
+        CheckSession();
         CheckKills();
         CheckJoins();
         if (PvPHost["gameMode"] != "Annihilation") {
@@ -352,14 +284,25 @@ bot.on('message', function (user, userID, channelID, message, rawEvent) {
 
 process.on('SIGINT', (code) => {
   SendToChat(bot.username+" is asked to close. Goodbye ! :hand_splayed:");
-  fs.stat('foo.txt', function(err, stat) {
+  fs.stat(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log", function(err, stat) {
     if(err == null) {
       fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
     } else {}
   });
+  MongoClient.connect(url, opts, function(err, db) {
+    if (err) {} else {
+      var collection = db.collection("ServerInfo");
+      serverquery["LastUpdate"] = new Date().getTime();
+      serverquery["Logging"] = false;
+      collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+      db.close(function (err, res) {
+        if (err) {}
+      });
+    }
+  });
   setTimeout(function () {
     process.exit();
-  }, 200);
+  }, 1000);
 });
 
 process.on('exit', (code) => {
@@ -434,6 +377,32 @@ function sleep(millis) {
     var curDate = null;
     do { curDate = new Date(); }
     while(curDate-date < millis);
+}
+
+function CheckSession() {
+  buffersi = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  if (PvPHost["Players"].length == 0) {
+    PvPHost["hasStarted"] = false;
+  }
+  buffersi.forEach(function (e) {
+    if (e.indexOf('SendSessionUpdate') > -1 && e.indexOf('{') > -1) {
+      param = JSON.parse(e.slice(e.indexOf('params:')+7,e.length));
+      if (param) {
+        Object.keys(param).map(function(objectKey, index) {
+          PvPHost[objectKey] = param[objectKey];
+        });
+        MongoClient.connect(url, opts, function(err, db) {
+          var collection = db.collection("ServerInfo");
+          serverquery = PvPHost;
+          serverquery["LastUpdate"] = new Date().getTime();
+          collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+          db.close(function (err, res) {
+            if (err) {}
+          });
+        });
+      }
+    }
+  });
 }
 
 function CheckKills() {
@@ -512,7 +481,7 @@ function CheckKills() {
       kill = {
         timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')),
         victim: e.slice(e.indexOf(': ')+2, e.indexOf(' was')),
-        killer: e.slice(e.indexOf('from ')+5, e.length),
+        killer: "Bullet Jump",
         weapon: "Bullet Jump"
       };
       if (e.indexOf("/") > -1) {
@@ -553,7 +522,13 @@ function CheckKills() {
       gamebufferindex++;
       //DBStuff
       PushKillToDB(e.victim.replace(/\./g,"\uff0e"),e.killer.replace(/\./g,"\uff0e"),e.weapon.replace(' ',''));
-      CheckAchievements(e.timestamp,e.victim.replace(/\./g,"\uff0e"),e.killer.replace(/\./g,"\uff0e"),e.weapon,e.shielddmg,e.healthdmg);
+      if (e.killer == "Knusperhase" && (e.victim == "Sweetsarah" || e.victim == "redheadgirl_")) {} else {
+        if (e.shielddmg == 0) {
+          CheckAchievements(e.timestamp,e.victim.replace(/\./g,"\uff0e"),e.killer.replace(/\./g,"\uff0e"),e.weapon,e.healthdmg,e.healthdmg);
+        } else {
+          CheckAchievements(e.timestamp,e.victim.replace(/\./g,"\uff0e"),e.killer.replace(/\./g,"\uff0e"),e.weapon,e.shielddmg,e.healthdmg);
+        }
+      }
     }, ik);
     ik += 1337; //( ͡° ͜ʖ ͡°)
   })
@@ -577,12 +552,15 @@ function CheckJoins() {
       if (PvPHost["gameMode"] == "Annihilation") {
         PvPHost["Players"].push(e.player);
         MongoClient.connect(url, opts, function(err, db) {
-          var collection = db.collection("ServerInfo");
-          serverquery = PvPHost;
-          collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
-          db.close(function (err, res) {
-  if (err) {}
-});
+          if (!err) {
+            var collection = db.collection("ServerInfo");
+            serverquery = PvPHost;
+            serverquery["LastUpdate"] = new Date().getTime();
+            collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+            db.close(function (err, res) {
+              if (err) {}
+            });
+          }
         });
       }
       SendToChat('`['+date+']'+' '+e.player+' has joined.'+'`');
@@ -614,10 +592,11 @@ function CheckTeams() {
             MongoClient.connect(url, opts, function(err, db) {
               var collection = db.collection("ServerInfo");
               serverquery = PvPHost;
+              serverquery["LastUpdate"] = new Date().getTime();
               collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
               db.close(function (err, res) {
-  if (err) {}
-});
+                if (err) {}
+              });
             });
             SendToChat('`['+date+']'+' '+e.player+' is now on team Sun.`');
           } else if (e.team == '1') {
@@ -626,6 +605,7 @@ function CheckTeams() {
             MongoClient.connect(url, opts, function(err, db) {
               var collection = db.collection("ServerInfo");
               serverquery = PvPHost;
+              serverquery["LastUpdate"] = new Date().getTime();
               collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
               db.close(function (err, res) {
   if (err) {}
@@ -641,10 +621,11 @@ function CheckTeams() {
           MongoClient.connect(url, opts, function(err, db) {
             var collection = db.collection("ServerInfo");
             serverquery = PvPHost;
+            serverquery["LastUpdate"] = new Date().getTime();
             collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
             db.close(function (err, res) {
-  if (err) {}
-});
+              if (err) {}
+            });
           });
           SendToChat('`['+date+']'+' '+e.player+' is now on team Sun.`');
         } else {
@@ -653,10 +634,11 @@ function CheckTeams() {
           MongoClient.connect(url, opts, function(err, db) {
             var collection = db.collection("ServerInfo");
             serverquery = PvPHost;
+            serverquery["LastUpdate"] = new Date().getTime();
             collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
             db.close(function (err, res) {
-  if (err) {}
-});
+              if (err) {}
+            });
           });
           SendToChat('`['+date+']'+' '+e.player+' is now on team Moon.`');
         }
@@ -689,6 +671,7 @@ function CheckDisconnects() {
         MongoClient.connect(url, opts, function(err, db) {
           var collection = db.collection("ServerInfo");
           serverquery = PvPHost;
+          serverquery["LastUpdate"] = new Date().getTime();
           collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
         });
       } else if (PvPHost["gameMode"] == "Team Annihilation") {
@@ -696,6 +679,7 @@ function CheckDisconnects() {
         MongoClient.connect(url, opts, function(err, db) {
           var collection = db.collection("ServerInfo");
           serverquery = PvPHost;
+          serverquery["LastUpdate"] = new Date().getTime();
           collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
         });
       }
@@ -753,6 +737,16 @@ function CheckMaps() {
       killingspree = {};
       rev = {};
       gamemap = e.map;
+      MongoClient.connect(url, opts, function(err, db) {
+        var collection = db.collection("ServerInfo");
+        serverquery = PvPHost;
+        serverquery["LastUpdate"] = new Date().getTime();
+        serverquery["CurrentMap"] = e.map;
+        collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+        db.close(function (err, res) {
+          if (err) {}
+        });
+      });
       fs.writeFile('./games.json', JSON.stringify(games, null, "\t"), 'utf-8');
     }, im);
     im += 1337; //( ͡° ͜ʖ ͡°)
@@ -839,9 +833,13 @@ function PushKillToDB(victim, killer, weapon) {
   kww = "KillsWith"+weapon;
   kov = "KillOn"+victim;
   MongoClient.connect(url, opts, function(err, db) {
-    var collection = db.collection('players');
+    if (err) {
+      setTimeout(function () {
+        PushKillToDB(victim, killer, weapon);
+      }, 1000);
+    } else {
+      var collection = db.collection('players');
 
-    try {
       vquery = {"Deaths":1};
       vquery[dbw] = 1;
       vquery[dbk] = 1;
@@ -851,64 +849,61 @@ function PushKillToDB(victim, killer, weapon) {
       kquery[kww] = 1;
       kquery[kov] = 1;
       collection.update({ "Name":killer },{ $inc: kquery },{upsert: true});
-    } catch (e) {
-      setTimeout(function () {
-        PushKillToDB(victim, killer, weapon);
-      }, 1000);
-    }
 
-    db.close(function (err, res) {
-  if (err) {}
-});
+      db.close(function (err, res) {
+        if (err) {}
+      });
+    }
   });
 }
 
 function CheckAchievements(timestamp,victim,killer,weapon,damage,totaldamage) {
 
   MongoClient.connect(url, opts, function(err, db) {
+    var query = {};
 
-    try {
+    if (!err) {
       //OverkillTrophy
       if (parseInt(totaldamage)-parseInt(damage) > 200) {
-        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOverkill1":1} },{upsert: true});
+        query["hasTrophyOverkill1"] = 1;
       }
       if (parseInt(totaldamage)-parseInt(damage) > 250) {
-        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOverkill2":1} },{upsert: true});
+        query["hasTrophyOverkill2"] = 1;
       }
       if (parseInt(totaldamage)-parseInt(damage) > 300) {
-        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOverkill3":1} },{upsert: true});
+        query["hasTrophyOverkill3"] = 1;
       }
 
       //SniperHeadshotTrophy
       if (weapon == "Snipetron" && parseInt(totaldamage) > 250) {
-        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+        query["hasTrophySniperHS"] = 1;
       }
       if (weapon == "Snipetron Vandal" && parseInt(totaldamage) > 230) {
-        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOverkill3":1} },{upsert: true});
+        query["hasTrophyOverkill3"] = 1;
       }
       if (weapon == "Rubico" && parseInt(totaldamage) > 250) {
-        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+        query["hasTrophySniperHS"] = 1;
       }
       if (weapon == "Vectis" && parseInt(totaldamage) > 247) {
-        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+        query["hasTrophySniperHS"] = 1;
       }
       if (weapon == "Vectis Prime" && parseInt(totaldamage) > 240) {
-        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+        query["hasTrophySniperHS"] = 1;
       }
       if (weapon == "Lanka" && parseInt(totaldamage) > 260) {
-        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophySniperHS":1} },{upsert: true});
+        query["hasTrophySniperHS"] = 1;
       }
 
       //OneshotTrophy
       if (parseInt(totaldamage) > 310) {
-        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOneshot1":1} },{upsert: true});
+        query["hasTrophyOneshot1"] = 1;
         if (!oneshots[killer] || oneshots[killer] == 0) {
           oneshots[killer] = 1;
         } else if (oneshots[killer] == 1) {
-          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOneshot2":1} },{upsert: true});
+          query["hasTrophyOneshot2"] = 1;
           oneshots[killer] = 2;
         } else if (oneshots[killer] >= 2) {
-          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyOneshot3":1} },{upsert: true});
+          query["hasTrophyOneshot3"] = 1;
           oneshots[killer] += 1;
         }
       } else {
@@ -919,22 +914,13 @@ function CheckAchievements(timestamp,victim,killer,weapon,damage,totaldamage) {
 
       //StaffKillTrophy
       if (victim.indexOf("[DE]") > -1) {
-        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyStaffKill":1} },{upsert: true});
+        query["hasTrophyStaffKill"] = 1;
       }
-
-      //MutualKillTrophies
-      gamebuffer.forEach(function (e) {
-        if (e.victim == killer || e.killer == victim) {
-          if (e.timestamp-timestamp < 500 && e.timestamp-timestamp > -500) {
-            db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyMutualKill1":1} },{upsert: true});
-          }
-        }
-      });
 
       //RevengeTrophy
       rev[victim] = killer;
       if (rev[killer] == victim) {
-        db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyRevenge":1} },{upsert: true});
+        query["hasTrophyRevenge"] = 1;
       }
 
       //KillingSpreeTrophies
@@ -946,28 +932,26 @@ function CheckAchievements(timestamp,victim,killer,weapon,damage,totaldamage) {
       } else {
         killingspree[killer] += 1;
         if (killingspree[killer] == 5) {
-          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyKillingspree1":1} },{upsert: true});
+          query["hasTrophyKillingspree1"] = 1;
         }
         if (killingspree[killer] == 10) {
-          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyKillingspree2":1} },{upsert: true});
+          query["hasTrophyKillingspree2"] = 1;
         }
         if (killingspree[killer] == 15) {
-          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyKillingspree3":1} },{upsert: true});
+          query["hasTrophyKillingspree3"] = 1;
         }
         if (killingspree[killer] == 20) {
-          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyKillingspree4":1} },{upsert: true});
+          query["hasTrophyKillingspree4"] = 1;
         }
         if (killingspree[killer] == 25) {
-          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyKillingspree5":1} },{upsert: true});
+          query["hasTrophyKillingspree5"] = 1;
         }
         if (killingspree[killer] == 30) {
-          db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyKillingspree6":1} },{upsert: true});
+          query["hasTrophyKillingspree6"] = 1;
         }
       }
 
-    } catch (e) {
-      console.log(e);
-      process.exit(1);
+      db.collection('players').update({ "Name":killer },{ $inc: query },{upsert: true});
     }
 
     db.close(function (err, res) {
@@ -982,7 +966,7 @@ function EndOfGameAchievements() {
   MongoClient.connect(url, opts, function(err, db) {
     var collection = db.collection('players');
 
-    try {
+    if (!err) {
       //TotalKillTrophies
       totalkill = {};
       gamebuffer.forEach(function (e) {
@@ -994,33 +978,46 @@ function EndOfGameAchievements() {
       });
       Object.keys(totalkill).map(function(objectKey, index) {
         if (PvPHost["gameMode"] == "Annihilation") {
+          query = {};
           if (totalkill[objectKey] >= 10) {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTotalKill1":1} },{upsert: true});
+            query["hasTrophyTotalKill1"] = 1;
           }
           if (totalkill[objectKey] >= 15) {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTotalKill2":1} },{upsert: true});
+            query["hasTrophyTotalKill2"] = 1;
           }
           if (totalkill[objectKey] >= 25) {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTotalKill3":1} },{upsert: true});
+            query["hasTrophyTotalKill3"] = 1;
           }
+          collection.update({ "Name":objectKey },{ $inc: query },{upsert: true});
         } else if (PvPHost["gameMode"] == "Team Annihilation") {
+          query = {};
           if (totalkill[objectKey] >= 10) {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill1":1} },{upsert: true});
+            query["hasTrophyTDMTotalKill1"] = 1;
           }
           if (totalkill[objectKey] >= 20) {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill2":1} },{upsert: true});
+            query["hasTrophyTDMTotalKill2"] = 1;
           }
           if (totalkill[objectKey] >= 30) {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill3":1} },{upsert: true});
+            query["hasTrophyTDMTotalKill3"] = 1;
           }
           if (totalkill[objectKey] >= 40) {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill4":1} },{upsert: true});
+            query["hasTrophyTDMTotalKill4"] = 1;
           }
           if (totalkill[objectKey] >= 45) {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill5":1} },{upsert: true});
+            query["hasTrophyTDMTotalKill5"] = 1;
           }
           if (totalkill[objectKey] >= 50) {
-            collection.update({ "Name":objectKey },{ $inc: {"hasTrophyTDMTotalKill6":1} },{upsert: true});
+            query["hasTrophyTDMTotalKill6"] = 1;
+          }
+          collection.update({ "Name":objectKey },{ $inc: query },{upsert: true});
+        }
+      });
+
+      //MutualKillTrophies
+      gamebuffer.forEach(function (e) {
+        if (e.victim == killer || e.killer == victim) {
+          if (e.timestamp-timestamp < 500 && e.timestamp-timestamp > -500) {
+            db.collection('players').update({ "Name":killer },{ $inc: {"hasTrophyMutualKill1":1} },{upsert: true});
           }
         }
       });
@@ -1036,25 +1033,26 @@ function EndOfGameAchievements() {
         }
       });
       Object.keys(fastkill).map(function(objectKey, index) {
+        query = {};
         for (var i = 0; i < fastkill[objectKey].length; i++) {
           if (fastkill[objectKey][i+1]) {
             if ((fastkill[objectKey][i]-fastkill[objectKey][i+1]) > -5000 && (fastkill[objectKey][i]-fastkill[objectKey][i+1]) < 5000) {
-              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill1":1} },{upsert: true});
+              query["hasTrophyFastKill1"] += 1;
               if (fastkill[objectKey][i+2]) {
                 if ((fastkill[objectKey][i+1]-fastkill[objectKey][i+2]) > -5000 && (fastkill[objectKey][i+1]-fastkill[objectKey][i+2]) < 5000) {
-                  collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill2":1} },{upsert: true});
+                  query["hasTrophyFastKill2"] += 1;
                   if (fastkill[objectKey][i+3]) {
                     if ((fastkill[objectKey][i+2]-fastkill[objectKey][i+3]) > -5000 && (fastkill[objectKey][i+2]-fastkill[objectKey][i+3]) < 5000) {
-                      collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill3":1} },{upsert: true});
+                      query["hasTrophyFastKill3"] += 1;
                       if (fastkill[objectKey][i+4]) {
                         if ((fastkill[objectKey][i+3]-fastkill[objectKey][i+4]) > -5000 && (fastkill[objectKey][i+3]-fastkill[objectKey][i+4]) < 5000) {
-                          collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill4":1} },{upsert: true});
+                          query["hasTrophyFastKill4"] += 1;
                           if (fastkill[objectKey][i+5]) {
                             if ((fastkill[objectKey][i+4]-fastkill[objectKey][i+5]) > -5000 && (fastkill[objectKey][i+4]-fastkill[objectKey][i+5]) < 5000) {
-                              collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill5":1} },{upsert: true});
+                              query["hasTrophyFastKill5"] += 1;
                               if (fastkill[objectKey][i+6]) {
                                 if ((fastkill[objectKey][i+5]-fastkill[objectKey][i+6]) > -5000 && (fastkill[objectKey][i+5]-fastkill[objectKey][i+6]) < 5000) {
-                                  collection.update({ "Name":objectKey },{ $inc: {"hasTrophyFastKill6":1} },{upsert: true});
+                                  query["hasTrophyFastKill6"] += 1;
                                 }
                               }
                             }
@@ -1068,6 +1066,7 @@ function EndOfGameAchievements() {
             }
           }
         }
+        collection.update({ "Name":objectKey },{ $inc: query },{upsert: true});
       });
 
       //EnemyKDRTrophies
@@ -1425,7 +1424,7 @@ function EndOfGameAchievements() {
           }
         }
       });
-    } catch (e) {}
+    }
 
     db.close(function (err, res) {
       if (err) {}
@@ -1437,7 +1436,7 @@ function EndOfGameAchievements() {
 function GetDBInfo(request) {
   MongoClient.connect(url, opts, function(err, db) {
 
-    try {
+    if (!err) {
       db.collection('players_'+ServerName).find({}).toArray(function(err, docs) {
         message = '';
         if (request.query == "kill") {
@@ -1541,11 +1540,11 @@ function GetDBInfo(request) {
           message: message
         });
       });
-    } catch (e) {}
+    }
 
     db.close(function (err, res) {
-  if (err) {}
-});
+      if (err) {}
+    });
   });
 
 }

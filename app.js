@@ -212,7 +212,7 @@ bot.on('ready', function () {
         write = ""+lastline;
         lastline = bwrite.pop();
         write += bwrite.join("\n");
-        fs.writeFile(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log", write, function(err) {
+        fs.writeFile(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log", write, function(err) {
           if(err) {
           return console.log(err);
           }
@@ -284,9 +284,9 @@ bot.on('message', function (user, userID, channelID, message, rawEvent) {
 
 process.on('SIGINT', (code) => {
   SendToChat(bot.username+" is asked to close. Goodbye ! :hand_splayed:");
-  fs.stat(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log", function(err, stat) {
+  fs.stat(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log", function(err, stat) {
     if(err == null) {
-      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log");
     } else {}
   });
   MongoClient.connect(url, opts, function(err, db) {
@@ -309,7 +309,7 @@ process.on('exit', (code) => {
   SendToChat(bot.username+" is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log");
     } else {}
   });
   setTimeout(function () {
@@ -321,7 +321,7 @@ process.on('SIGQUIT', (code) => {
   SendToChat(bot.username+" is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log");
     } else {}
   });
   setTimeout(function () {
@@ -333,7 +333,7 @@ process.on('SIGSTOP', (code) => {
   SendToChat(bot.username+" is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log");
     } else {}
   });
   setTimeout(function () {
@@ -345,7 +345,7 @@ process.on('SIGTERM', (code) => {
   SendToChat(bot.username+" is asked to close. Goodbye ! :hand_splayed:");
   fs.stat('foo.txt', function(err, stat) {
     if(err == null) {
-      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log");
+      fs.unlinkSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log");
     } else {}
   });
   setTimeout(function () {
@@ -380,7 +380,7 @@ function sleep(millis) {
 }
 
 function CheckSession() {
-  buffersi = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  buffersi = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log").toString().split("\n");
   if (PvPHost["Players"].length == 0) {
     PvPHost["hasStarted"] = false;
   }
@@ -408,7 +408,7 @@ function CheckSession() {
 function CheckKills() {
   console.log('Checking for kills...');
   var kills = [];
-  bufferk = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  bufferk = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log").toString().split("\n");
   bufferk.forEach(function (e) {
     if (e.indexOf('was killed') > -1 && e.indexOf('using a') > -1) {
       wp = getWeaponName(e.slice(e.indexOf('using a ')+8, e.length-1).replace(/ /g, '+'));
@@ -537,7 +537,7 @@ function CheckKills() {
 function CheckJoins() {
   console.log('Checking for joins...');
   var joins = [];
-  bufferj = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  bufferj = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log").toString().split("\n");
   bufferj.forEach(function (e) {
     if (e.indexOf('AddPlayerToSession') > -1) {
       join = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), player: e.slice(e.indexOf('AddPlayerToSession(')+19, e.indexOf(',mm='))};
@@ -572,7 +572,7 @@ function CheckJoins() {
 function CheckTeams() {
   console.log('Checking for team changes...');
   var teams = [];
-  buffert = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  buffert = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log").toString().split("\n");
   buffert.forEach(function (e) {
     if (e.indexOf('PvpTeamSelect') > -1) {
       team = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), player: e.slice(e.indexOf('Adding ')+7, e.indexOf(' to team')), team: e.slice(e.length-1,e.length)};
@@ -651,7 +651,7 @@ function CheckTeams() {
 function CheckDisconnects() {
   console.log('Checking for disconnects...');
   var disconnects = [];
-  bufferd = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  bufferd = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log").toString().split("\n");
   bufferd.forEach(function (e) {
     if (e.indexOf('Server: Client') > -1 && e.indexOf('disconnected') > -1 ) {
       disconnect = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), player: e.slice(e.indexOf('Client "')+8, e.indexOf('" disconnected'))};
@@ -692,7 +692,7 @@ function CheckDisconnects() {
 function CheckMaps() {
   console.log('Checking for maps changes...');
   var data = [];
-  bufferm = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer.log").toString().split("\n");
+  bufferm = fs.readFileSync(process.env.USERPROFILE+"/AppData/Local/Warframe/Buffer"+ServerName+".log").toString().split("\n");
   bufferm.forEach(function (e) {
     if (e.indexOf('Loading /Lotus/Levels/PVP/') > -1 && e.indexOf('.level') > -1 ) {
       map = {timestamp: parseInt(starttime) + parseInt(e.slice(0, e.indexOf('.')+4).replace('.','')), map: getMapName(e.slice(e.indexOf('PVP/')+4, e.indexOf('.level')))};

@@ -690,7 +690,11 @@ function CheckDisconnects() {
           collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
         });
       } else if (PvPHost["gameMode"] == "Team Annihilation") {
-        delete PvPHost["Players"][e.player];
+        PvPHost["Players"].forEach(function (el, i) {
+          if (el.Name == e.player) {
+            PvPHost["Players"].splice(i,1);
+          }
+        });
         MongoClient.connect(url, opts, function(err, db) {
           var collection = db.collection("ServerInfo");
           serverquery = PvPHost;

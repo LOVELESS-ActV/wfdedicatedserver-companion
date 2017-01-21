@@ -593,6 +593,7 @@ function CheckTeams() {
               var collection = db.collection("ServerInfo");
               serverquery = PvPHost;
               serverquery["LastUpdate"] = new Date().getTime();
+              CleanPvPHostPlayers();
               collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
               db.close(function (err, res) {
                 if (err) {}
@@ -606,10 +607,11 @@ function CheckTeams() {
               var collection = db.collection("ServerInfo");
               serverquery = PvPHost;
               serverquery["LastUpdate"] = new Date().getTime();
+              CleanPvPHostPlayers();
               collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
               db.close(function (err, res) {
-  if (err) {}
-});
+                if (err) {}
+              });
             });
             SendToChat('`['+date+']'+' '+e.player+' is now on team Moon.`');
           }
@@ -622,6 +624,7 @@ function CheckTeams() {
             var collection = db.collection("ServerInfo");
             serverquery = PvPHost;
             serverquery["LastUpdate"] = new Date().getTime();
+            CleanPvPHostPlayers();
             collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
             db.close(function (err, res) {
               if (err) {}
@@ -635,6 +638,7 @@ function CheckTeams() {
             var collection = db.collection("ServerInfo");
             serverquery = PvPHost;
             serverquery["LastUpdate"] = new Date().getTime();
+            CleanPvPHostPlayers();
             collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
             db.close(function (err, res) {
               if (err) {}
@@ -646,6 +650,17 @@ function CheckTeams() {
     }, it);
     it += 1337; //( ͡° ͜ʖ ͡°)
   })
+}
+
+function CleanPvPHostPlayers() {
+  Dup = {};
+  PvPHost["Players"].forEach(function (e, index) {
+    if (Dup[e.Name]) {
+      PvPHost["Players"].splice(index,1);
+    } else {
+      Dup[e.Name] = 1;
+    }
+  });
 }
 
 function CheckDisconnects() {

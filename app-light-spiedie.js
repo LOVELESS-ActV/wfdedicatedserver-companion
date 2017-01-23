@@ -192,7 +192,7 @@ setTimeout(function () {
         CheckSession();
         CheckKills();
         CheckJoins();
-        if (PvPHost["gameMode"] != "Annihilation") {
+        if (PvPHost["gameMode"] != "Annihilation" && PvPHost["gameModeId"] != 406014) {
           CheckTeams();
         }
         CheckDisconnects();
@@ -413,7 +413,7 @@ function CheckJoins() {
     var date = new Date(e.timestamp);
     date = date.getDate()+' '+monthNames[date.getMonth()]+' '+date.getFullYear()+' - '+pad(date.getHours(),2)+':'+pad(date.getMinutes(),2)+':'+pad(date.getSeconds(),2)+':'+pad(date.getMilliseconds(), 3);
     setTimeout(function () {
-      if (PvPHost["gameMode"] == "Annihilation") {
+      if (PvPHost["gameMode"] == "Annihilation" || PvPHost["gameModeId"] == 406014) {
         PvPHost["Players"].push(e.player);
         MongoClient.connect(url, opts, function(err, db) {
           if (!err) {
@@ -537,7 +537,7 @@ function CheckDisconnects() {
     var date = new Date(e.timestamp);
     date = date.getDate()+' '+monthNames[date.getMonth()]+' '+date.getFullYear()+' - '+pad(date.getHours(),2)+':'+pad(date.getMinutes(),2)+':'+pad(date.getSeconds(),2)+':'+pad(date.getMilliseconds(), 3);
     setTimeout(function () {
-      if (PvPHost["gameMode"] == "Annihilation") {
+      if (PvPHost["gameMode"] == "Annihilation" || PvPHost["gameModeId"] == 406014) {
         rem = PvPHost["Players"].indexOf(e.player);
         if (rem > -1) {
           PvPHost["Players"].splice(rem, 1);
@@ -548,7 +548,7 @@ function CheckDisconnects() {
           serverquery["LastUpdate"] = new Date().getTime();
           collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
         });
-      } else if (PvPHost["gameMode"] == "Team Annihilation") {
+      } else {
         PvPHost["Players"].forEach(function (el, i) {
           if (el.Name == e.player) {
             PvPHost["Players"].splice(i,1);

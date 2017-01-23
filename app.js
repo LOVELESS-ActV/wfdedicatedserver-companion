@@ -294,6 +294,7 @@ process.on('SIGINT', (code) => {
       var collection = db.collection("ServerInfo");
       serverquery["LastUpdate"] = new Date().getTime();
       serverquery["Logging"] = false;
+      serverquery["Players"] = [];
       collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
       db.close(function (err, res) {
         if (err) {}

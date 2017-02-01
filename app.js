@@ -530,11 +530,33 @@ function CheckKills() {
           CheckAchievements(e.timestamp,e.victim.replace(/\./g,"\uff0e"),e.killer.replace(/\./g,"\uff0e"),e.weapon,e.shielddmg,e.healthdmg);
         }
       }
-      if (!FindPvPHostPlayers(e.victim)) {
+      if (FindPvPHostPlayers(e.victim)) {} else {
         PvPHost["Players"].push(e.victim);
+        MongoClient.connect(url, opts, function(err, db) {
+          if (!err) {
+            var collection = db.collection("ServerInfo");
+            serverquery = PvPHost;
+            serverquery["LastUpdate"] = new Date().getTime();
+            collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+            db.close(function (err, res) {
+              if (err) {}
+            });
+          }
+        });
       }
-      if (!FindPvPHostPlayers(e.killer)) {
+      if (FindPvPHostPlayers(e.killer)) {} else {
         PvPHost["Players"].push(e.killer);
+        MongoClient.connect(url, opts, function(err, db) {
+          if (!err) {
+            var collection = db.collection("ServerInfo");
+            serverquery = PvPHost;
+            serverquery["LastUpdate"] = new Date().getTime();
+            collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+            db.close(function (err, res) {
+              if (err) {}
+            });
+          }
+        });
       }
     }, ik);
     ik += 1337; //( ͡° ͜ʖ ͡°)

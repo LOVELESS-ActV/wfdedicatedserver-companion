@@ -531,32 +531,36 @@ function CheckKills() {
         }
       }
       if (FindPvPHostPlayers(e.victim)) {} else {
-        PvPHost["Players"].push(e.victim);
-        MongoClient.connect(url, opts, function(err, db) {
-          if (!err) {
-            var collection = db.collection("ServerInfo");
-            serverquery = PvPHost;
-            serverquery["LastUpdate"] = new Date().getTime();
-            collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
-            db.close(function (err, res) {
-              if (err) {}
-            });
-          }
-        });
+        if (e.victim != "BunkersGrineerTurret" && e.victim != "Map") {
+          PvPHost["Players"].push(e.victim);
+          MongoClient.connect(url, opts, function(err, db) {
+            if (!err) {
+              var collection = db.collection("ServerInfo");
+              serverquery = PvPHost;
+              serverquery["LastUpdate"] = new Date().getTime();
+              collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+              db.close(function (err, res) {
+                if (err) {}
+              });
+            }
+          });
+        }
       }
       if (FindPvPHostPlayers(e.killer)) {} else {
-        PvPHost["Players"].push(e.killer);
-        MongoClient.connect(url, opts, function(err, db) {
-          if (!err) {
-            var collection = db.collection("ServerInfo");
-            serverquery = PvPHost;
-            serverquery["LastUpdate"] = new Date().getTime();
-            collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
-            db.close(function (err, res) {
-              if (err) {}
-            });
-          }
-        });
+        if (e.killer != "BunkersGrineerTurret" && e.killer != "Map") {
+          PvPHost["Players"].push(e.killer);
+          MongoClient.connect(url, opts, function(err, db) {
+            if (!err) {
+              var collection = db.collection("ServerInfo");
+              serverquery = PvPHost;
+              serverquery["LastUpdate"] = new Date().getTime();
+              collection.update({ "Name":ServerName },{ $set: serverquery },{upsert: true});
+              db.close(function (err, res) {
+                if (err) {}
+              });
+            }
+          });
+        }
       }
     }, ik);
     ik += 1337; //( ͡° ͜ʖ ͡°)

@@ -393,6 +393,12 @@ function CheckKills() {
           CheckAchievements(e.timestamp,e.victim.replace(/\./g,"\uff0e"),e.killer.replace(/\./g,"\uff0e"),e.weapon,e.shielddmg,e.healthdmg);
         }
       }
+      if (!FindPvPHostPlayers(e.victim)) {
+        PvPHost["Players"].push(e.victim);
+      }
+      if (!FindPvPHostPlayers(e.killer)) {
+        PvPHost["Players"].push(e.killer);
+      }
     }, ik);
     ik += 1337; //( ͡° ͜ʖ ͡°)
   })
@@ -520,6 +526,16 @@ function CleanPvPHostPlayers() {
       Dup[e.Name] = 1;
     }
   });
+}
+
+function FindPvPHostPlayers(player) {
+  found = false;
+  PvPHost["Players"].forEach(function (e) {
+    if (e == player) {
+      found = true;
+    }
+  });
+  return found;
 }
 
 function CheckDisconnects() {
@@ -778,8 +794,9 @@ function CheckAchievements(timestamp,victim,killer,weapon,damage,totaldamage) {
           query["hasTrophyKillingspree6"] = 1;
         }
       }
-
-      db.collection('players').update({ "Name":killer },{ $inc: query },{upsert: true});
+      if (Object.keys(query).length === 0) {} else {
+        db.collection('players').update({ "Name":killer },{ $inc: query },{upsert: true});
+      }
     }
 
     db.close(function (err, res) {
@@ -805,8 +822,8 @@ function EndOfGameAchievements() {
         }
       });
       Object.keys(totalkill).map(function(objectKey, index) {
+        query = {};
         if (PvPHost["gameMode"] == "Annihilation") {
-          query = {};
           if (totalkill[objectKey] >= 10) {
             query["hasTrophyTotalKill1"] = 1;
           }
@@ -816,9 +833,7 @@ function EndOfGameAchievements() {
           if (totalkill[objectKey] >= 25) {
             query["hasTrophyTotalKill3"] = 1;
           }
-          collection.update({ "Name":objectKey },{ $inc: query },{upsert: true});
         } else if (PvPHost["gameMode"] == "Team Annihilation") {
-          query = {};
           if (totalkill[objectKey] >= 10) {
             query["hasTrophyTDMTotalKill1"] = 1;
           }
@@ -837,6 +852,8 @@ function EndOfGameAchievements() {
           if (totalkill[objectKey] >= 50) {
             query["hasTrophyTDMTotalKill6"] = 1;
           }
+        }
+        if (Object.keys(query).length === 0) {} else {
           collection.update({ "Name":objectKey },{ $inc: query },{upsert: true});
         }
       });
@@ -894,7 +911,9 @@ function EndOfGameAchievements() {
             }
           }
         }
-        collection.update({ "Name":objectKey },{ $inc: query },{upsert: true});
+        if (Object.keys(query).length === 0) {} else {
+          collection.update({ "Name":objectKey },{ $inc: query },{upsert: true});
+        }
       });
 
       //EnemyKDRTrophies

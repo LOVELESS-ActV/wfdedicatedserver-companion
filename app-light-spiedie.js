@@ -394,7 +394,7 @@ function CheckKills() {
         }
       }
       if (FindPvPHostPlayers(e.victim)) {} else {
-        if (e.victim != "BunkersGrineerTurret" && e.victim != "Map") {
+        if (e.victim != "BunkersGrineerTurret" && e.victim != "Map" && e.victim != "BulletJump") {
           PvPHost["Players"].push(e.victim);
           MongoClient.connect(url, opts, function(err, db) {
             if (!err) {
@@ -410,7 +410,7 @@ function CheckKills() {
         }
       }
       if (FindPvPHostPlayers(e.killer)) {} else {
-        if (e.killer != "BunkersGrineerTurret" && e.killer != "Map") {
+        if (e.killer != "BunkersGrineerTurret" && e.killer != "Map" && e.killer != "BulletJump") {
           PvPHost["Players"].push(e.killer);
           MongoClient.connect(url, opts, function(err, db) {
             if (!err) {
